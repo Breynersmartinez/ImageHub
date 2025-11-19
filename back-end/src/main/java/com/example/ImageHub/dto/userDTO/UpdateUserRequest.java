@@ -5,18 +5,23 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.management.relation.Role;
+import com.example.ImageHub.model.enums.Role;
 import java.util.UUID;
 
+// DTO para actualizar usuario
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateUserRequest {
-    private UUID id;
+    private Integer idCard;
+    //COMPOSICION
     private String firstName;
     private String lastName;
     private String email;
-    private String password;
+    private String password; // Opcional, solo si se quiere cambiar
+    private String phoneNumber;
+    private String direction;
     private Role role;
+    private Boolean active;
 }

@@ -1,26 +1,30 @@
 package com.example.ImageHub.dto.userDTO;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.management.relation.Role;
+import com.example.ImageHub.model.enums.Role;
+
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-//DTO para respuesta de usuario (sin contraseña)
+// DTO para respuesta de usuario (sin contraseña)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserResponse {
-
-    private UUID id;
+    private Integer idCard;
+    //COMPOSICION
     private String firstName;
     private String lastName;
     private String email;
-    private String password;
+    private String phoneNumber;
+    private String direction;
     private Role role;
+    private LocalDateTime registrationDate;
+    private Boolean active;
 }

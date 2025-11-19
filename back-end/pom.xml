@@ -30,7 +30,6 @@
 		<java.version>21</java.version>
 	</properties>
 	<dependencies>
-
 		<!-- Spring Security -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -104,14 +103,6 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-		<!--	Dependencia de mercado pago -->
-		<dependency>
-			<groupId>com.mercadopago</groupId>
-			<artifactId>sdk-java</artifactId>
-			<version>2.1.7</version>
-		</dependency>
-
 
 		<dependency>
 			<groupId>jakarta.validation</groupId>
