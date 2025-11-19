@@ -15,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterRequest {
-    private Integer idCard;
+    private UUID id;
     //COMPOSICION
     private String firstName;
     private String lastName;

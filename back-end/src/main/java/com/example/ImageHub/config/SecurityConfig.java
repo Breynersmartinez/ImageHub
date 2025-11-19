@@ -1,6 +1,5 @@
 package com.example.ImageHub.config;
 
-
 import com.example.ImageHub.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

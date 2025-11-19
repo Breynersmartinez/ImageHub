@@ -104,11 +104,12 @@
 			<scope>test</scope>
 		</dependency>
 
+<!--
 		<dependency>
 			<groupId>jakarta.validation</groupId>
 			<artifactId>jakarta.validation-api</artifactId>
 		</dependency>
-
+-->
 
 		<!-- Image Processing Libraries -->
 		<dependency>
@@ -123,7 +124,7 @@
 			<version>4.2</version>
 		</dependency>
 
-		<!-- Database Libraries -->
+		<!-- Database Libraries
 
 		<dependency>
 			<groupId>org.flywaydb</groupId>
@@ -131,7 +132,7 @@
 			<version>9.22.3</version>
 		</dependency>
 
-
+-->
 
 
 	</dependencies>

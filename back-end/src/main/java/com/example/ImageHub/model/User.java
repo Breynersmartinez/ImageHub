@@ -1,8 +1,9 @@
 package com.example.ImageHub.model;
 
 import com.example.ImageHub.audit.Auditable;
-import com.example.ImageHub.model.enums.Role;
+
 import jakarta.persistence.*;
+import com.example.ImageHub.model.enums.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

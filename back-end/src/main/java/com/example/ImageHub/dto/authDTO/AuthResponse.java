@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.management.relation.Role;
+import com.example.ImageHub.model.enums.Role;
 import java.util.UUID;
 
 @Data

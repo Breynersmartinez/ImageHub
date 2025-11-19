@@ -6,10 +6,8 @@ import com.example.ImageHub.dto.authDTO.LoginRequest;
 import com.example.ImageHub.dto.userDTO.RegisterRequest;
 
 
-
 import com.example.ImageHub.model.User;
 import com.example.ImageHub.repository.UserRepository;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -18,6 +16,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+
 
 import java.time.LocalDateTime;
 
@@ -72,15 +72,18 @@ public class AuthService {
         msg.setTo(user.getEmail());
         msg.setSubject("¡Bienvenido al sistema de Parqueadero! "); // Asunto más claro
         msg.setText(
-                "Hola " + user.getFirstName() + ",\n\n" + user.getLastName() + ",\n\n" +
-                        "Tu registro en el sistema de parqueadero se ha realizado con éxito.\n\n" +
-                        " Fecha de registro: " + user.getRegistrationDate() + "\n" +
-                        " Usuario (email): " + user.getEmail() + "\n\n" +
+                "Hola " + user.getFirstName() + " " + user.getLastName() + ",\n\n" +
+                        "Tu registro en ImageHub se ha realizado con éxito.\n\n" +
+                        "Detalles de tu cuenta:\n" +
+                        "• Nombre: " + user.getFirstName() + " " + user.getLastName() + "\n" +
+                        "• Email: " + user.getEmail() + "\n" +
                         "Ya puedes ingresar a la plataforma con tus credenciales.\n\n" +
-                        "Si tienes dudas, comunícate con nosotros a través de nuestro WhatsApp empresarial: https://wa.me/573103212753\n\n" +
-                        "¡Gracias por confiar en nuestro servicio!\n\n" +
+                        "Si tienes preguntas o necesitas asistencia, no dudes en contactarnos:\n" +
+                        " WhatsApp: https://wa.me/573103212753\n" +
+                        " Email: bmtechnologicalsolutions@gmail.com\n\n" +
+                        "¡Gracias por confiar en ImageHub\n!\n\n" +
                         "Atentamente,\n" +
-                        "Equipo de Parqueadero"
+                        "Equipo ImageHub\n"
         );
 
         try {
