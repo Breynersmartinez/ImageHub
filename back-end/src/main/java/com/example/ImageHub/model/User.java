@@ -76,7 +76,18 @@ public class User extends Auditable<User> implements UserDetails {
     }
 
 
+
     //getters and setters
+
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
     @Override
     public String getUsername() {
         return email; // Usamos el email como username

@@ -14,6 +14,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -55,6 +56,7 @@ public class AuthService {
 
         // Crear el usuario
         User user = new User();
+        user.setId(request.getId());
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
@@ -91,7 +93,7 @@ public class AuthService {
         }
         catch (MailException ex) {
             // simply log it and go on...
-            System.err.println(ex.getMessage());
+            System.err.println(" Error enviando correo " + ex.getMessage());
         }
 
         // Generar token JWT
@@ -108,6 +110,8 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
+        // BadCredentialsException será lanzada automáticamente por authenticationManager
+
         // Autenticar
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -118,7 +122,8 @@ public class AuthService {
 
         // Si llega aquí, la autenticación fue exitosa
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                //Excepcion usada de GlobalExceptionHandler
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
         // Generar token JWT
         String jwtToken = jwtService.generateToken(user);

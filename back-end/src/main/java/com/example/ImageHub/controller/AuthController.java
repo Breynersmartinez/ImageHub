@@ -19,29 +19,25 @@ public class AuthController {
         this.authService = authService;
     }
 
+    //  Las excepciones se lanzan naturalmente y el handler las captura.
+
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
-        try {
-            AuthResponse response = authService.register(request);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest()
-                    .body(AuthResponse.builder()
-                            .message(e.getMessage())
-                            .build());
-        }
+        // Las excepciones serán capturadas automáticamente por GlobalExceptionHandler
+        AuthResponse response = authService.register(request);
+        return ResponseEntity.ok(response);
+
+
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
-        try {
-            AuthResponse response = authService.login(request);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest()
-                    .body(AuthResponse.builder()
-                            .message("Credenciales inválidas")
-                            .build());
-        }
+        // BadCredentialsException será capturada por GlobalExceptionHandler
+        AuthResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
+
+
     }
+
+
 }

@@ -8,6 +8,8 @@ import com.example.ImageHub.dto.userDTO.UserResponse;
 import com.example.ImageHub.model.User;
 import com.example.ImageHub.model.enums.Role;
 import com.example.ImageHub.repository.UserRepository;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,14 +40,15 @@ public class UserService {
     // Obtener usuario por ID
     public UserResponse getUserById(UUID id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+                //Reemplazo de RuntimeException con excepciones específicas
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con ID: " + id));
         return convertToResponse(user);
     }
 
     // Obtener usuario por email
     public UserResponse getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con email: " + email));
         return convertToResponse(user);
     }
 
@@ -53,7 +56,7 @@ public class UserService {
     @Transactional
     public UserResponse updateUser(UUID id, UpdateUserRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con ID: " + id));
 
         // Actualizar solo los campos que no son nulos
         if (request.getFirstName() != null && !request.getFirstName().isEmpty()) {
@@ -69,7 +72,8 @@ public class UserService {
             userRepository.findByEmail(request.getEmail())
                     .ifPresent(existingUser -> {
                         if (!existingUser.getEmail().equals(id)) {
-                            throw new RuntimeException("El email ya está en uso");
+                            //Reemplazo de RuntimeException con excepcion específica
+                            throw new DataIntegrityViolationException("El email ya está en uso");
                         }
                     });
             user.setEmail(request.getEmail());
@@ -103,7 +107,7 @@ public class UserService {
     @Transactional
     public void deleteUser(UUID id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con ID: " + id));
         userRepository.delete(user);
     }
 
@@ -111,7 +115,7 @@ public class UserService {
     @Transactional
     public UserResponse deactivateUser(UUID id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con ID: " + id));
         user.setActive(false);
         User updatedUser = userRepository.save(user);
         return convertToResponse(updatedUser);
@@ -121,7 +125,7 @@ public class UserService {
     @Transactional
     public UserResponse activateUser(UUID id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con ID: " + id));
         user.setActive(true);
         User updatedUser = userRepository.save(user);
         return convertToResponse(updatedUser);
@@ -144,6 +148,7 @@ public class UserService {
     // Convertir User a UserResponse (sin exponer la contraseña)
     private UserResponse convertToResponse(User user) {
         return UserResponse.builder()
+                .id(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())
