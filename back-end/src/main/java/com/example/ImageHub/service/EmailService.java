@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailService {
 
-    @Value("${spring.mail.username}")
+    @Value("${user.name.email}")
     private String mail;
 
     private final JavaMailSender mailSender;
@@ -22,12 +22,13 @@ public class EmailService {
     }
 
     // Envia un email de bienvenida al usuario registrado
-    // Si falla, solo registra el error sin interrumpir el proceso de registro
     public void sendWelcomeEmail(User user) {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(user.getEmail());
         msg.setSubject("Bienvenido al sistema ImageHub!");
         msg.setText(buildWelcomeEmailContent(user));
+        // Esta linea es importante para el cuerpo de solicitud para sendgrid
+        msg.setFrom(mail); //  Esta línea es clave para evitar el error 550
 
         try {
             this.mailSender.send(msg);
