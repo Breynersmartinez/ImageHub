@@ -6,11 +6,7 @@ import com.example.ImageHub.dto.authDTO.LoginRequest;
 import com.example.ImageHub.dto.userDTO.RegisterRequest;
 import com.example.ImageHub.model.User;
 import com.example.ImageHub.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,29 +18,26 @@ import java.time.LocalDateTime;
 @Service
 public class AuthService {
 
-    @Value("${spring.mail.username}")
-    private String mail;
+
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final JavaMailSender mailSender;
-    private final SimpleMailMessage templateMessage;
+    private final EmailService emailService;
 
     // Mensajes de error centralizados
     private static final String EMAIL_ALREADY_REGISTERED = "El email ya esta registrado";
     private static final String USER_NOT_FOUND = "Usuario no encontrado";
 
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService,
-                       AuthenticationManager authenticationManager, JavaMailSender mailSender,
-                       SimpleMailMessage templateMessage) {
+                       AuthenticationManager authenticationManager, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
-        this.mailSender = mailSender;
-        this.templateMessage = templateMessage;
+        this.emailService = emailService;
+
     }
 
     // Registrar un nuevo usuario en el sistema
@@ -59,7 +52,7 @@ public class AuthService {
         userRepository.save(user);
 
         // Enviamos email de bienvenida
-        sendWelcomeEmail(user);
+        emailService.sendWelcomeEmail(user);
 
         // Generamos y retornamos el token JWT
         String jwtToken = jwtService.generateToken(user);
@@ -112,36 +105,7 @@ public class AuthService {
         return user;
     }
 
-    // Envia un email de bienvenida al usuario registrado
-    // Si falla, solo registra el error sin interrumpir el proceso de registro
-    private void sendWelcomeEmail(User user) {
-        SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
-        msg.setTo(user.getEmail());
-        msg.setSubject("Bienvenido al sistema ImageHub!");
-        msg.setText(buildWelcomeEmailContent(user));
 
-        try {
-            this.mailSender.send(msg);
-        } catch (MailException ex) {
-            System.err.println("Error enviando correo: " + ex.getMessage());
-        }
-    }
-
-    // Construye el contenido del email de bienvenida
-    private String buildWelcomeEmailContent(User user) {
-        return "Hola " + user.getFirstName() + " " + user.getLastName() + ",\n\n" +
-                "Tu registro en ImageHub se ha realizado con exito.\n\n" +
-                "Detalles de tu cuenta:\n" +
-                "• Nombre: " + user.getFirstName() + " " + user.getLastName() + "\n" +
-                "• Email: " + user.getEmail() + "\n\n" +
-                "Ya puedes ingresar a la plataforma con tus credenciales.\n\n" +
-                "Si tienes preguntas o necesitas asistencia, no dudes en contactarnos:\n" +
-                " WhatsApp: https://wa.me/573103212753\n" +
-                " Email: bmtechnologicalsolutions@gmail.com\n\n" +
-                "Gracias por confiar en ImageHub!\n\n" +
-                "Atentamente,\n" +
-                "Equipo ImageHub";
-    }
 
     // Construye la respuesta de autenticacion con el token y datos del usuario
     private AuthResponse buildAuthResponse(User user, String token, String message) {
