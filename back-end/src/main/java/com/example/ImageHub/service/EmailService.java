@@ -15,17 +15,16 @@ public class EmailService {
     private String mail;
 
     private final JavaMailSender mailSender;
-    private final SimpleMailMessage templateMessage;
 
-    public EmailService(JavaMailSender mailSender, SimpleMailMessage templateMessage) {
+    public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
-        this.templateMessage = templateMessage;
+
     }
 
     // Envia un email de bienvenida al usuario registrado
     // Si falla, solo registra el error sin interrumpir el proceso de registro
     public void sendWelcomeEmail(User user) {
-        SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
+        SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(user.getEmail());
         msg.setSubject("Bienvenido al sistema ImageHub!");
         msg.setText(buildWelcomeEmailContent(user));
