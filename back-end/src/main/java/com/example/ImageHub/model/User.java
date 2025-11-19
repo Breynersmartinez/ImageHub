@@ -93,6 +93,7 @@ public class User extends Auditable<User> implements UserDetails {
         return email; // Usamos el email como username
     }
 
+
     @Override
     public boolean isAccountNonExpired() {
         return true;
