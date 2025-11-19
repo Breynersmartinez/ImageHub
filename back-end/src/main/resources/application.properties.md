@@ -1,0 +1,1 @@
+spring.mail.port=587
