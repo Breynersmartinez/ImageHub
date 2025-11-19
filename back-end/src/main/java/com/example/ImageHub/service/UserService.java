@@ -1,10 +1,8 @@
 package com.example.ImageHub.service;
 
 
-
 import com.example.ImageHub.dto.userDTO.UpdateUserRequest;
 import com.example.ImageHub.dto.userDTO.UserResponse;
-
 import com.example.ImageHub.model.User;
 import com.example.ImageHub.model.enums.Role;
 import com.example.ImageHub.repository.UserRepository;
@@ -19,11 +17,15 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    // Mensajes de error centralizados
+    private static final String USER_NOT_FOUND_ID = "Usuario no encontrado con ID: ";
+    private static final String USER_NOT_FOUND_EMAIL = "Usuario no encontrado con email: ";
+    private static final String EMAIL_ALREADY_IN_USE = "El email ya esta en uso";
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -37,28 +39,38 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    // Obtener usuario por ID
+    // Obtener un usuario por su ID
     public UserResponse getUserById(UUID id) {
-        User user = userRepository.findById(id)
-                //Reemplazo de RuntimeException con excepciones específicas
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con ID: " + id));
+        User user = findUserById(id);
         return convertToResponse(user);
     }
 
-    // Obtener usuario por email
+    // Obtener un usuario por email
     public UserResponse getUserByEmail(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con email: " + email));
+        User user = findUserByEmail(email);
         return convertToResponse(user);
     }
 
-    // Actualizar usuario
+    // Obtener todos los usuarios activos
+    public List<UserResponse> getActiveUsers() {
+        return userRepository.findByActive(true).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    // Obtener usuarios segun su rol
+    public List<UserResponse> getUsersByRole(Role role) {
+        return userRepository.findByRole(role).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    // Actualizar datos del usuario
     @Transactional
     public UserResponse updateUser(UUID id, UpdateUserRequest request) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con ID: " + id));
+        User user = findUserById(id);
 
-        // Actualizar solo los campos que no son nulos
+        // Solo actualizamos los campos que no sean nulos
         if (request.getFirstName() != null && !request.getFirstName().isEmpty()) {
             user.setFirstName(request.getFirstName());
         }
@@ -68,14 +80,7 @@ public class UserService {
         }
 
         if (request.getEmail() != null && !request.getEmail().isEmpty()) {
-            // Verificar que el email no esté en uso por otro usuario
-            userRepository.findByEmail(request.getEmail())
-                    .ifPresent(existingUser -> {
-                        if (!existingUser.getEmail().equals(id)) {
-                            //Reemplazo de RuntimeException con excepcion específica
-                            throw new DataIntegrityViolationException("El email ya está en uso");
-                        }
-                    });
+            validateEmailUniqueness(request.getEmail(), id);
             user.setEmail(request.getEmail());
         }
 
@@ -103,49 +108,54 @@ public class UserService {
         return convertToResponse(updatedUser);
     }
 
-    // Eliminar usuario (eliminación física)
+    // Eliminar un usuario de forma fisica de la base de datos
     @Transactional
     public void deleteUser(UUID id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con ID: " + id));
+        User user = findUserById(id);
         userRepository.delete(user);
     }
 
-    // Desactivar usuario (eliminación lógica - recomendado)
+    // Desactivar un usuario sin borrarlo de la base de datos (soft delete)
     @Transactional
     public UserResponse deactivateUser(UUID id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con ID: " + id));
+        User user = findUserById(id);
         user.setActive(false);
         User updatedUser = userRepository.save(user);
         return convertToResponse(updatedUser);
     }
 
-    // Activar usuario
+    // Reactivar un usuario que estaba desactivado
     @Transactional
     public UserResponse activateUser(UUID id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con ID: " + id));
+        User user = findUserById(id);
         user.setActive(true);
         User updatedUser = userRepository.save(user);
         return convertToResponse(updatedUser);
     }
 
-    // Obtener usuarios activos
-    public List<UserResponse> getActiveUsers() {
-        return userRepository.findByActive(true).stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
+    // Busca el usuario por ID, lanza excepcion si no existe
+    private User findUserById(UUID id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_ID + id));
     }
 
-    // Obtener usuarios por rol
-    public List<UserResponse> getUsersByRole(Role role) {
-        return userRepository.findByRole(role).stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
+    // Busca el usuario por email, lanza excepcion si no existe
+    private User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_EMAIL + email));
     }
 
-    // Convertir User a UserResponse (sin exponer la contraseña)
+    // Verifica que el email no este siendo usado por otro usuario
+    // Excluye el usuario actual para poder actualizar otros datos sin cambiar el email
+    private void validateEmailUniqueness(String email, UUID excludeUserId) {
+        userRepository.findByEmail(email).ifPresent(existingUser -> {
+            if (!existingUser.getId().equals(excludeUserId)) {
+                throw new DataIntegrityViolationException(EMAIL_ALREADY_IN_USE);
+            }
+        });
+    }
+
+    // Convierte un User a UserResponse para no exponer datos sensibles como la contrasena
     private UserResponse convertToResponse(User user) {
         return UserResponse.builder()
                 .id(user.getId())

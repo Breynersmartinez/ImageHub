@@ -2,8 +2,6 @@ package com.example.ImageHub.controller;
 
 import com.example.ImageHub.dto.userDTO.UpdateUserRequest;
 import com.example.ImageHub.dto.userDTO.UserResponse;
-
-
 import com.example.ImageHub.model.enums.Role;
 import com.example.ImageHub.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +23,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Obtener todos los usuarios (solo admin)
+    // Obtener todos los usuarios - solo admins
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
@@ -33,17 +31,14 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    // Obtener usuario por ID (admin o el mismo usuario)
-    //     Tanto los usuarios como los administradores pueden realizar peticiones
-//     Los usuarios y administradores deben utilizar su respectivo tockend para poder realizar las peticiones
-
+    // Obtener un usuario especifico por su ID
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUserById(@PathVariable UUID id) {
         UserResponse user = userService.getUserById(id);
         return ResponseEntity.ok(user);
     }
 
-    // Obtener perfil del usuario autenticado
+    // Obtener el perfil del usuario que esta autenticado
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication) {
         String email = authentication.getName();
@@ -51,7 +46,7 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    // Obtener usuarios activos (solo admin)
+    // Obtener todos los usuarios activos - solo admins
     @GetMapping("/active")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponse>> getActiveUsers() {
@@ -59,7 +54,7 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    // Obtener usuarios por rol (solo admin)
+    // Obtener usuarios por su rol - solo admins
     @GetMapping("/role/{role}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponse>> getUsersByRole(@PathVariable Role role) {
@@ -67,7 +62,7 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    // Actualizar usuario (admin o el mismo usuario)
+    // Actualizar un usuario - el admin puede todo, los usuarios solo su informacion
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     public ResponseEntity<UserResponse> updateUser(
@@ -75,26 +70,25 @@ public class UserController {
             @RequestBody UpdateUserRequest request,
             Authentication authentication
     ) {
-        if (!authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+        // Los usuarios normales no pueden cambiar su rol ni estado activo
+        // Solo los admins pueden hacer eso
+        if (!isAdmin(authentication)) {
             request.setRole(null);
             request.setActive(null);
         }
 
         UserResponse updatedUser = userService.updateUser(id, request);
         return ResponseEntity.ok(updatedUser);
-
     }
 
-    // Eliminar usuario físicamente (solo admin)
+    // Eliminar un usuario de forma fisica - solo admins
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
 
-    // Desactivar usuario (eliminación lógica - solo admin)
+    // Desactivar un usuario (soft delete) - solo admins
     @PatchMapping("/{id}/deactivate")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> deactivateUser(@PathVariable UUID id) {
@@ -102,11 +96,17 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    // Activar usuario (solo admin)
+    // Reactivar un usuario desactivado - solo admins
     @PatchMapping("/{id}/activate")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> activateUser(@PathVariable UUID id) {
         UserResponse user = userService.activateUser(id);
         return ResponseEntity.ok(user);
+    }
+
+    // Verifica si el usuario autenticado tiene rol de admin
+    private boolean isAdmin(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
     }
 }

@@ -64,7 +64,7 @@ public class User extends Auditable<User> implements UserDetails {
         this.role = role;
         this.active = active;
     }
-
+//constructor vacio
     public User() {
 
     }
