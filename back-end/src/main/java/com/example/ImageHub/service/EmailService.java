@@ -2,42 +2,50 @@ package com.example.ImageHub.service;
 
 
 import com.example.ImageHub.model.User;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 @Service
 public class EmailService {
 
+    @Value("${sendgrid.api.key}")
+    private String sendgridApiKey;
+
     @Value("${user.name.email}")
     private String mail;
 
-    private final JavaMailSender mailSender;
 
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
-
-    }
 
     // Envia un email de bienvenida al usuario registrado
     public void sendWelcomeEmail(User user) {
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(user.getEmail());
-        msg.setSubject("Bienvenido al sistema ImageHub!");
-        msg.setText(buildWelcomeEmailContent(user));
-        // Esta linea es importante para el cuerpo de solicitud para sendgrid
-        msg.setFrom(mail); //  Esta línea es importante para evitar el error 550
+        Email from = new Email(mail);
+        String subject = "Bienvenido al sistema ImageHub!";
+        Email to = new Email(user.getEmail());
+        Content content = new Content("text/plain", buildWelcomeEmailContent(user));
+        Mail mail = new Mail(from, subject, to, content);
 
+        SendGrid sg = new SendGrid(sendgridApiKey);
+        Request request = new Request();
         try {
-            this.mailSender.send(msg);
-        } catch (MailException ex) {
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sg.api(request);
+            System.out.println("Email enviado con código: " + response.getStatusCode());
+        } catch (IOException ex) {
             System.err.println("Error enviando correo: " + ex.getMessage());
         }
     }
 
-    // Construye el contenido del email de bienvenida
     public String buildWelcomeEmailContent(User user) {
         return "Hola " + user.getFirstName() + " " + user.getLastName() + ",\n\n" +
                 "Tu registro en ImageHub se ha realizado con exito.\n\n" +
@@ -52,5 +60,4 @@ public class EmailService {
                 "Atentamente,\n" +
                 "Equipo ImageHub";
     }
-
 }
