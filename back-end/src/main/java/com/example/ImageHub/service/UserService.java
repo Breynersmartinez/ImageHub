@@ -1,6 +1,7 @@
 package com.example.ImageHub.service;
 
 
+import com.example.ImageHub.constants.AppConstants;
 import com.example.ImageHub.dto.userDTO.UpdateUserRequest;
 import com.example.ImageHub.dto.userDTO.UserResponse;
 import com.example.ImageHub.model.User;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -21,15 +23,14 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private  AppConstants appConstants;
 
-    // Mensajes de error centralizados
-    private static final String USER_NOT_FOUND_ID = "Usuario no encontrado con ID: ";
-    private static final String USER_NOT_FOUND_EMAIL = "Usuario no encontrado con email: ";
-    private static final String EMAIL_ALREADY_IN_USE = "El email ya esta en uso";
+
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+
     }
 
     // Obtener todos los usuarios
@@ -48,6 +49,12 @@ public class UserService {
     // Obtener un usuario por email
     public UserResponse getUserByEmail(String email) {
         User user = findUserByEmail(email);
+        return convertToResponse(user);
+    }
+
+    //Obtener usuario por apellido
+    public UserResponse getUserByLastName(String lastName) {
+        User user = findUserByLastName(lastName);
         return convertToResponse(user);
     }
 
@@ -136,13 +143,19 @@ public class UserService {
     // Busca el usuario por ID, lanza excepcion si no existe
     private User findUserById(UUID id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_ID + id));
+                .orElseThrow(() -> new UsernameNotFoundException(appConstants.USER_NOT_FOUND_ID + id));
     }
 
     // Busca el usuario por email, lanza excepcion si no existe
     private User findUserByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_EMAIL + email));
+                .orElseThrow(() -> new UsernameNotFoundException(appConstants.USER_NOT_FOUND_EMAIL + email));
+    }
+
+    // Busca el suaurio por apellido, lanza la excepcion si no existe
+    private User findUserByLastName(String lastName){
+        return userRepository.findByLastName(lastName)
+                .orElseThrow(() -> new UsernameNotFoundException(appConstants.USER_NOT_FOUND_LAST_NAME + lastName) );
     }
 
     // Verifica que el email no este siendo usado por otro usuario
@@ -150,7 +163,7 @@ public class UserService {
     private void validateEmailUniqueness(String email, UUID excludeUserId) {
         userRepository.findByEmail(email).ifPresent(existingUser -> {
             if (!existingUser.getId().equals(excludeUserId)) {
-                throw new DataIntegrityViolationException(EMAIL_ALREADY_IN_USE);
+                throw new DataIntegrityViolationException(appConstants.EMAIL_ALREADY_IN_USE);
             }
         });
     }

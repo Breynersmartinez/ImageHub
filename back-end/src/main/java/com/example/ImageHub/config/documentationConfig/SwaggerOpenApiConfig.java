@@ -29,8 +29,8 @@ public class SwaggerOpenApiConfig {
     public OpenAPI springOpenAPI() {
         final String securitySchemeName = "bearerAuth";
         return new OpenAPI()
-                .info(new Info().title("Parking Management API")
-                        .description("API del sistema de gestión de parqueadero con autenticación JWT")
+                .info(new Info().title("ImageHub API ")
+                        .description("API del ImageHub con autenticación JWT")
                         .version("v0.0.1")
                         .license(new License().name("Apache 2.0").url("http://springdoc.org")))
 

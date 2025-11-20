@@ -28,10 +28,10 @@ spring.servlet.multipart.max-file-size=5MB
 spring.servlet.multipart.max-request-size=5MB
 image.supported-formats=jpg,jpeg,png
 
-
+# Local Storage configs
 image.input.path=D:\\Tech\\images\\input
 image.output.path=D:\\Tech\\images\\output
 
-
+# Format SQL nicely
 spring.jpa.properties.hibernate.format_sql=false
 

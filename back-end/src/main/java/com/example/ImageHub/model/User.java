@@ -72,7 +72,8 @@ public class User extends Auditable<User> implements UserDetails {
         this.role = role;
         this.active = active;
     }
-//constructor vacio
+
+    //constructor vacio
     public User() {
 
     }
@@ -82,7 +83,6 @@ public class User extends Auditable<User> implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
-
 
 
     //getters and setters
@@ -122,8 +122,6 @@ public class User extends Auditable<User> implements UserDetails {
     public boolean isEnabled() {
         return active;
     }
-
-
 
 
     @Override
@@ -184,7 +182,6 @@ public class User extends Auditable<User> implements UserDetails {
     }
 
 
-
     public String getFirstName() {
         return firstName;
     }
@@ -200,8 +197,6 @@ public class User extends Auditable<User> implements UserDetails {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
-
-
 
 
 }

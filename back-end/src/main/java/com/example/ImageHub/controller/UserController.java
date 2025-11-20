@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -31,12 +32,15 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+
     // Obtener un usuario especifico por su ID
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUserById(@PathVariable UUID id) {
         UserResponse user = userService.getUserById(id);
         return ResponseEntity.ok(user);
     }
+
+
 
     // Obtener el perfil del usuario que esta autenticado
     @GetMapping("/me")
