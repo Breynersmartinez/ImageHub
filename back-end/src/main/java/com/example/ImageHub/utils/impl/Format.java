@@ -42,19 +42,44 @@ public class Format implements ImageTransform {
                 throw new IOException("No se pudo leer la imagen");
             }
 
+            // Separar ruta y extension actual
             String[] splitPath = imagePath.split("\\.(?=[^\\.]+$)");
-            String newPath = splitPath[0] + "." + newFormat;
-            String oldFormat = splitPath[1];
 
-            log.info("[FORMAT] Ruta actual: {}", imagePath);
+            if (splitPath.length < 2) {
+                log.error("[FORMAT] Ruta de archivo invalida: {}", imagePath);
+                throw new IOException("Ruta de archivo invalida");
+            }
+
+            String basePath = splitPath[0];
+            String oldFormat = splitPath[1].toLowerCase();
+
+            log.info("[FORMAT] Formato actual: {}", oldFormat);
+            log.info("[FORMAT] Ruta base: {}", basePath);
+
+            // Si el formato es el mismo, no hacer nada
+            if (oldFormat.equals(newFormat)) {
+                log.info("[FORMAT] El formato ya es {}, no hay cambios necesarios", newFormat);
+                return;
+            }
+
+            // Crear nueva ruta con el nuevo formato
+            String newPath = basePath + "." + newFormat;
             log.info("[FORMAT] Nueva ruta: {}", newPath);
 
-            ImageIO.write(originalImage, newFormat, new File(newPath));
-            log.info("[FORMAT] Archivo nuevo creado");
+            // Guardar la imagen en el nuevo formato
+            boolean written = ImageIO.write(originalImage, newFormat, new File(newPath));
 
-            // Eliminar archivo antiguo si cambio de formato
-            if (!newPath.equals(imagePath)) {
-                boolean deleted = new File(imagePath).delete();
+            if (!written) {
+                log.error("[FORMAT] No se pudo escribir la imagen en formato {}", newFormat);
+                throw new IOException("No se pudo guardar la imagen en formato: " + newFormat);
+            }
+
+            log.info("[FORMAT] Archivo nuevo creado correctamente");
+
+            // Eliminar archivo antiguo
+            File oldFile = new File(imagePath);
+            if (oldFile.exists()) {
+                boolean deleted = oldFile.delete();
                 if (deleted) {
                     log.info("[FORMAT] Archivo antiguo eliminado: {}", imagePath);
                 } else {
@@ -83,7 +108,7 @@ public class Format implements ImageTransform {
     // Validar que el formato sea soportado por la aplicacion
     private boolean isSupportedFormat(String format) {
         for (String supported : SUPPORTED_FORMATS) {
-            if (supported.equals(format)) {
+            if (supported.equals(format.toLowerCase())) {
                 return true;
             }
         }
