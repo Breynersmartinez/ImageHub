@@ -28,7 +28,7 @@ public class EmailService {
         msg.setSubject("Bienvenido al sistema ImageHub!");
         msg.setText(buildWelcomeEmailContent(user));
         // Esta linea es importante para el cuerpo de solicitud para sendgrid
-        msg.setFrom(mail); //  Esta línea es clave para evitar el error 550
+        msg.setFrom(mail); //  Esta línea es importante para evitar el error 550
 
         try {
             this.mailSender.send(msg);
