@@ -24,7 +24,6 @@ spring.mail.properties.mail.smtp.auth=true
 spring.mail.host=smtp.sendgrid.net
 spring.mail.port=587
 spring.mail.username=BM Technological Solutions
-spring.mail.password=
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 
