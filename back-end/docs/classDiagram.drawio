@@ -1,0 +1,150 @@
+<mxfile host="app.diagrams.net" modified="2025-11-20" agent="5.0" version="24.0.0" type="device">
+  <diagram name="ImageHub Class Diagram" id="imagehub-classes">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="800" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- MODELS -->
+        <mxCell id="user_class" value="User" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d4e6f1;strokeColor=#1f618d;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="50" y="50" width="200" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="user_attrs" value="- id: UUID&#10;- email: String&#10;- password: String&#10;- role: Role&#10;- active: Boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="user_class" vertex="1">
+          <mxGeometry y="26" width="200" height="114" as="geometry" />
+        </mxCell>
+
+        <mxCell id="role_class" value="Role" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d5f4e6;strokeColor=#186a3b;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="350" y="50" width="150" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="role_attrs" value="USER&#10;ADMIN" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="role_class" vertex="1">
+          <mxGeometry y="26" width="150" height="54" as="geometry" />
+        </mxCell>
+
+        <mxCell id="image_class" value="ImageMetadata" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#fdebd0;strokeColor=#9a6c06;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="700" y="50" width="220" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="image_attrs" value="- id: UUID&#10;- userName: String&#10;- imageName: String&#10;- inputPath: String&#10;- transformPath: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="image_class" vertex="1">
+          <mxGeometry y="26" width="220" height="114" as="geometry" />
+        </mxCell>
+
+        <!-- CONTROLLERS -->
+        <mxCell id="auth_controller" value="AuthController" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#fadbd8;strokeColor=#641e16;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="50" y="280" width="180" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="auth_controller_methods" value="+ register()&#10;+ login()" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="auth_controller" vertex="1">
+          <mxGeometry y="26" width="180" height="74" as="geometry" />
+        </mxCell>
+
+        <mxCell id="user_controller" value="UserController" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#fadbd8;strokeColor=#641e16;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="280" y="280" width="200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="user_controller_methods" value="+ getAllUsers()&#10;+ getCurrentUser()&#10;+ updateUser()&#10;+ deleteUser()" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="user_controller" vertex="1">
+          <mxGeometry y="26" width="200" height="94" as="geometry" />
+        </mxCell>
+
+        <mxCell id="image_controller" value="ImageController" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#fadbd8;strokeColor=#641e16;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="550" y="280" width="220" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="image_controller_methods" value="+ uploadImage()&#10;+ downloadImage()&#10;+ transformImage()&#10;+ getUserImages()" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="image_controller" vertex="1">
+          <mxGeometry y="26" width="220" height="114" as="geometry" />
+        </mxCell>
+
+        <!-- SERVICES -->
+        <mxCell id="auth_service" value="AuthService" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d6eaf8;strokeColor=#1f618d;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="50" y="500" width="180" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="auth_service_methods" value="+ register()&#10;+ login()" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="auth_service" vertex="1">
+          <mxGeometry y="26" width="180" height="74" as="geometry" />
+        </mxCell>
+
+        <mxCell id="user_service" value="UserService" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d6eaf8;strokeColor=#1f618d;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="280" y="500" width="200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="user_service_methods" value="+ getAllUsers()&#10;+ updateUser()&#10;+ deleteUser()&#10;+ deactivateUser()" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="user_service" vertex="1">
+          <mxGeometry y="26" width="200" height="94" as="geometry" />
+        </mxCell>
+
+        <mxCell id="file_storage_service" value="FileStorageService" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d6eaf8;strokeColor=#1f618d;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="550" y="500" width="220" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="file_storage_methods" value="+ saveFile()&#10;+ getFile()&#10;+ getAllImageMetadataByUser()&#10;+ deleteImage()" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="file_storage_service" vertex="1">
+          <mxGeometry y="26" width="220" height="94" as="geometry" />
+        </mxCell>
+
+        <mxCell id="image_proc_service" value="ImageProcService" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d6eaf8;strokeColor=#1f618d;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="850" y="500" width="220" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="image_proc_methods" value="+ transformImageHandler()" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="image_proc_service" vertex="1">
+          <mxGeometry y="26" width="220" height="74" as="geometry" />
+        </mxCell>
+
+        <!-- STRATEGIES -->
+        <mxCell id="transform_interface" value="&lt;&lt;interface&gt;&gt;&#10;ImageTransform" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#e8daef;strokeColor=#512e5f;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="800" y="700" width="220" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="transform_methods" value="+ transform()&#10;+ canHandle()" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="transform_interface" vertex="1">
+          <mxGeometry y="40" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="resize_strategy" value="Resize" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#eaf2f5;strokeColor=#36393d;rounded=0;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="450" y="700" width="120" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="crop_strategy" value="Crop" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#eaf2f5;strokeColor=#36393d;rounded=0;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="600" y="700" width="120" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="filter_strategy" value="Filter" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#eaf2f5;strokeColor=#36393d;rounded=0;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="750" y="700" width="120" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- RELATIONSHIPS -->
+        <!-- User - Role -->
+        <mxCell id="user_role" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;startArrow=diamondThin;startFill=0;startSize=30;" parent="1" source="user_class" target="role_class" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ImageMetadata - User -->
+        <mxCell id="image_user" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endFill=0;" parent="1" source="image_class" target="user_class" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Controllers - Services -->
+        <mxCell id="auth_ctrl_srv" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endFill=0;" parent="1" source="auth_controller" target="auth_service" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="user_ctrl_srv" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endFill=0;" parent="1" source="user_controller" target="user_service" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="image_ctrl_file_srv" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endFill=0;" parent="1" source="image_controller" target="file_storage_service" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="image_ctrl_proc_srv" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endFill=0;" parent="1" source="image_controller" target="image_proc_service" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ImageProcService - ImageTransform -->
+        <mxCell id="proc_transform" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endFill=0;" parent="1" source="image_proc_service" target="transform_interface" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Strategies implement ImageTransform -->
+        <mxCell id="resize_impl" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;dashed=1;" parent="1" source="resize_strategy" target="transform_interface" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="crop_impl" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;dashed=1;" parent="1" source="crop_strategy" target="transform_interface" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="filter_impl" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;dashed=1;" parent="1" source="filter_strategy" target="transform_interface" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
