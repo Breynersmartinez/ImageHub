@@ -4,6 +4,9 @@ import com.example.ImageHub.audit.Auditable;
 
 import jakarta.persistence.*;
 import com.example.ImageHub.model.enums.Role;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,7 +18,6 @@ import java.util.UUID;
 
 
 @Entity
-
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "usuarios")
 public class User extends Auditable<User> implements UserDetails {
@@ -26,21 +28,27 @@ public class User extends Auditable<User> implements UserDetails {
 
 
     @Column(name = "NOMBRE", nullable = false)
+    @NotBlank(message = " El campo firstName no puede quedar en blanco ")
     private String firstName;
 
     @Column(name = "APELLIDO", nullable = false)
+    @NotBlank(message = " El campo lastName no puede quedar en blanco ")
     private String lastName;
 
     @Column(name = "CONTRASEÑA", nullable = false)
+    @NotBlank(message = " El campo password no puede quedar en blanco ")
     private String password;
 
     @Column(name = "CORREO", unique = true, nullable = false)
+    @NotBlank(message = " El campo email no puede quedar en blanco ")
     private String email;
 
     @Column(name = "NUMERO_TELEFONO")
+    @NotBlank(message = " El campo phoneNumber no puede quedar en blanco ")
     private String phoneNumber;
 
     @Column(name = "DIRECCION")
+    @NotBlank(message = " El campo direction no puede quedar en blanco ")
     private String direction;
 
     @Column(name = "FECHA_REGISTRO")
