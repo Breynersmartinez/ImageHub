@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useAuth } from './context/AuthContext.jsx';
+import LandingPage from './components/LandingPage';
 import Login from './components/Login';
 import ClientSignUp from './components/ClientSignUp';
 import Dashboard from './components/Dashboard';
-import UserDashboard from './components/UserDashboard'; // Importa tu componente admin
+import UserDashboard from './components/UserDashboard';
 
 const App = () => {
     const { isLoading, isAuthenticated, user } = useAuth();
-    const [currentPage, setCurrentPage] = useState('login');
+    const [currentPage, setCurrentPage] = useState('home');
 
     const navigateTo = (page) => {
         setCurrentPage(page);
@@ -34,18 +35,20 @@ const App = () => {
         }
     }
 
-    // Si no está autenticado, mostrar Login o SignUp
+    // Si no está autenticado, mostrar páginas públicas
     switch (currentPage) {
+        case 'home':
+            return <LandingPage navigateTo={navigateTo} />;
         case 'login':
             return <Login navigateTo={navigateTo} />;
-        case 'clientSignUp':
+        case 'signup':
             return <ClientSignUp navigateTo={navigateTo} />;
         case 'dashboard':
             return <Dashboard navigateTo={navigateTo} />;
         case 'userDashboard':
             return <UserDashboard navigateTo={navigateTo} />;
         default:
-            return <Login navigateTo={navigateTo} />;
+            return <LandingPage navigateTo={navigateTo} />;
     }
 };
 
