@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import AuthService from '../services/AuthService';
-import { useAuth } from '../context/AuthContext.js';
+import { useAuth } from '../context/AuthContext.jsx';
 import logo from "../assets/bm.png";
 
 function Login({ navigateTo }) {

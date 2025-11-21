@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from './context/AuthContext.js';
+import { useAuth } from './context/AuthContext.jsx';
 import Login from './components/Login';
 import ClientSignUp from './components/ClientSignUp';
 import Dashboard from './components/Dashboard';
