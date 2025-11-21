@@ -1,205 +1,205 @@
-# ImageHub API Documentation
+# Documentación API ImageHub
 
-## Table of Contents
+## Tabla de Contenidos
 
-1. [General Description](#general-description)
-2. [API Information](#api-information)
-3. [Authentication](#authentication)
-4. [User Management](#user-management)
-5. [Image Management](#image-management)
-6. [HTTP Status Codes](#http-status-codes)
-7. [Model Structures](#model-structures)
-8. [Complete Usage Example](#complete-usage-example)
-
----
-
-## General Description
-
-ImageHub is a comprehensive REST API that allows users to manage their profiles and perform advanced image operations. The API features JWT-based authentication, role-based access control (ADMIN and USER roles), and uses the Strategy Pattern for modular image transformations. It integrates SendGrid for email notifications and Spring Security for robust authentication and authorization.
+1. [Descripción General](#descripción-general)
+2. [Información de la API](#información-de-la-api)
+3. [Autenticación](#autenticación)
+4. [Gestión de Usuarios](#gestión-de-usuarios)
+5. [Gestión de Imágenes](#gestión-de-imágenes)
+6. [Códigos de Estado HTTP](#códigos-de-estado-http)
+7. [Estructuras de Modelos](#estructuras-de-modelos)
+8. [Ejemplo de Uso Completo](#ejemplo-de-uso-completo)
 
 ---
 
-## API Information
+## Descripción General
 
-**Base URL:** `http://localhost:8080/api`
+ImageHub es una API REST completa que permite a los usuarios gestionar sus perfiles y realizar operaciones avanzadas con imágenes. La API incluye autenticación basada en JWT, control de acceso basado en roles (roles ADMIN y USER) e implementa el patrón Strategy para transformaciones modulares de imágenes. Se integra con SendGrid para notificaciones por correo electrónico y utiliza Spring Security para autenticación y autorización robustas.
 
-**Authentication:** JWT Bearer Token
+---
 
-**Content-Type:** `application/json` (except in upload)
+## Información de la API
 
-**CORS:** Configured for specific origins
+**URL Base:** `http://localhost:8080/api`
+
+**Autenticación:** Token Bearer JWT
+
+**Content-Type:** `application/json` (excepto en carga de archivos)
+
+**CORS:** Configurado para orígenes específicos
 
 **Roles:** ADMIN, USER
 
 ---
 
-## Authentication
+## Autenticación
 
-### JWT Configuration
+### Configuración JWT
 
-All endpoints (except public ones) require a valid JWT token in the header:
+Todos los puntos finales (excepto los públicos) requieren un token JWT válido en el encabezado:
 
 ```
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
 ```
 
-**Token Properties:**
-- Expiration time: Configurable in `application.properties`
-- Algorithm: HS256
-- Secret key: Stored in environment variables
+**Propiedades del Token:**
+- Tiempo de expiración: Configurable en `application.properties`
+- Algoritmo: HS256
+- Clave secreta: Almacenada en variables de entorno
 
-**Public Endpoints:**
+**Puntos Finales Públicos:**
 - `POST /api/auth/register`
 - `POST /api/auth/login`
-- Swagger/OpenAPI documentation
+- Documentación Swagger/OpenAPI
 
 ---
 
-## Authentication Endpoints
+## Puntos Finales de Autenticación
 
-### 1. Register User
+### 1. Registrar Usuario
 
-**Description:** Create a new user account in the system.
+**Descripción:** Crear una nueva cuenta de usuario en el sistema.
 
-**Method:** `POST`
+**Método:** `POST`
 
 **URL:** `/api/auth/register`
 
-**Authentication:** Not Required
+**Autenticación:** No requerida
 
-**Headers:**
+**Encabezados:**
 ```
 Content-Type: application/json
 ```
 
-**Body Parameters:**
-| Parameter | Type | Required | Description |
+**Parámetros del Cuerpo:**
+| Parámetro | Tipo | Requerido | Descripción |
 |-----------|------|----------|------------|
-| id | UUID | No | User ID (generated if not provided) |
-| firstName | String | Yes | First name (cannot be blank) |
-| lastName | String | Yes | Last name (cannot be blank) |
-| email | String | Yes | Email address (must be unique) |
-| password | String | Yes | Password (will be encrypted) |
-| phoneNumber | String | Yes | Phone number |
-| direction | String | Yes | Address |
-| role | String | No | USER or ADMIN (defaults to USER) |
+| id | UUID | No | ID de usuario (generado automáticamente si no se proporciona) |
+| firstName | String | Sí | Nombre (no puede estar vacío) |
+| lastName | String | Sí | Apellido (no puede estar vacío) |
+| email | String | Sí | Correo electrónico (debe ser único) |
+| password | String | Sí | Contraseña (será encriptada) |
+| phoneNumber | String | Sí | Número de teléfono |
+| direction | String | Sí | Dirección |
+| role | String | No | USER o ADMIN (por defecto USER) |
 
-**Example Request (cURL):**
+**Ejemplo de Solicitud (cURL):**
 ```bash
 curl -X POST http://localhost:8080/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "firstName": "John",
-    "lastName": "Doe",
-    "email": "john.doe@gmail.com",
-    "password": "SecurePassword123!",
+    "firstName": "Juan",
+    "lastName": "Pérez",
+    "email": "juan.perez@gmail.com",
+    "password": "ContraseñaSegura123!",
     "phoneNumber": "+573103212753",
     "direction": "Calle 123 #45-67",
     "role": "USER"
   }'
 ```
 
-**Example Success Response (200 OK):**
+**Respuesta de Éxito (200 OK):**
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiJ9...",
-  "email": "john.doe@gmail.com",
-  "firstName": "John",
-  "lastName": "Doe",
+  "email": "juan.perez@gmail.com",
+  "firstName": "Juan",
+  "lastName": "Pérez",
   "role": "USER",
-  "message": "User registered successfully"
+  "message": "Usuario registrado exitosamente"
 }
 ```
 
-**Possible Errors:**
-- `400 Bad Request` - Email already registered or invalid data
-- `500 Internal Server Error` - Server error during registration
+**Posibles Errores:**
+- `400 Bad Request` - Correo electrónico ya registrado o datos inválidos
+- `500 Internal Server Error` - Error del servidor durante el registro
 
 ---
 
-### 2. Login User
+### 2. Iniciar Sesión
 
-**Description:** Authenticate user and obtain JWT token.
+**Descripción:** Autenticar usuario y obtener token JWT.
 
-**Method:** `POST`
+**Método:** `POST`
 
 **URL:** `/api/auth/login`
 
-**Authentication:** Not Required
+**Autenticación:** No requerida
 
-**Headers:**
+**Encabezados:**
 ```
 Content-Type: application/json
 ```
 
-**Body Parameters:**
-| Parameter | Type | Required | Description |
+**Parámetros del Cuerpo:**
+| Parámetro | Tipo | Requerido | Descripción |
 |-----------|------|----------|------------|
-| email | String | Yes | User email address |
-| password | String | Yes | User password |
+| email | String | Sí | Correo electrónico del usuario |
+| password | String | Sí | Contraseña del usuario |
 
-**Example Request (cURL):**
+**Ejemplo de Solicitud (cURL):**
 ```bash
 curl -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "john.doe@gmail.com",
-    "password": "SecurePassword123!"
+    "email": "juan.perez@gmail.com",
+    "password": "ContraseñaSegura123!"
   }'
 ```
 
-**Example Success Response (200 OK):**
+**Respuesta de Éxito (200 OK):**
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiJ9...",
-  "email": "john.doe@gmail.com",
-  "firstName": "John",
-  "lastName": "Doe",
+  "email": "juan.perez@gmail.com",
+  "firstName": "Juan",
+  "lastName": "Pérez",
   "role": "USER",
-  "message": "Login successful"
+  "message": "Inicio de sesión exitoso"
 }
 ```
 
-**Possible Errors:**
-- `401 Unauthorized` - Invalid credentials
-- `404 Not Found` - User not found
-- `500 Internal Server Error` - Server error
+**Posibles Errores:**
+- `401 Unauthorized` - Credenciales inválidas
+- `404 Not Found` - Usuario no encontrado
+- `500 Internal Server Error` - Error del servidor
 
 ---
 
-## User Management Endpoints
+## Puntos Finales de Gestión de Usuarios
 
-### 1. Get All Users
+### 1. Obtener Todos los Usuarios
 
-**Description:** Retrieve all users in the system. Only for ADMIN users.
+**Descripción:** Recuperar todos los usuarios del sistema. Solo para usuarios ADMIN.
 
-**Method:** `GET`
+**Método:** `GET`
 
 **URL:** `/api/users`
 
-**Authentication:** Required
+**Autenticación:** Requerida
 
-**Authorization:** ADMIN role only
+**Autorización:** Solo rol ADMIN
 
-**Headers:**
+**Encabezados:**
 ```
 Authorization: Bearer [token]
 ```
 
-**Example Request (cURL):**
+**Ejemplo de Solicitud (cURL):**
 ```bash
 curl -X GET http://localhost:8080/api/users \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
 ```
 
-**Example Success Response (200 OK):**
+**Respuesta de Éxito (200 OK):**
 ```json
 [
   {
     "id": "550e8400-e29b-41d4-a716-446655440000",
-    "firstName": "John",
-    "lastName": "Doe",
-    "email": "john.doe@gmail.com",
+    "firstName": "Juan",
+    "lastName": "Pérez",
+    "email": "juan.perez@gmail.com",
     "phoneNumber": "+573103212753",
     "direction": "Calle 123 #45-67",
     "role": "USER",
@@ -209,45 +209,45 @@ curl -X GET http://localhost:8080/api/users \
 ]
 ```
 
-**Possible Errors:**
-- `401 Unauthorized` - Invalid or expired token
-- `403 Forbidden` - User is not an admin
+**Posibles Errores:**
+- `401 Unauthorized` - Token inválido o expirado
+- `403 Forbidden` - El usuario no es administrador
 
 ---
 
-### 2. Get User by ID
+### 2. Obtener Usuario por ID
 
-**Description:** Retrieve a specific user by their unique ID.
+**Descripción:** Recuperar un usuario específico por su ID único.
 
-**Method:** `GET`
+**Método:** `GET`
 
 **URL:** `/api/users/{id}`
 
-**Authentication:** Required
+**Autenticación:** Requerida
 
-**URL Parameters:**
-| Parameter | Type | Required | Description |
+**Parámetros de URL:**
+| Parámetro | Tipo | Requerido | Descripción |
 |-----------|------|----------|------------|
-| id | UUID | Yes | Unique user ID |
+| id | UUID | Sí | ID único del usuario |
 
-**Headers:**
+**Encabezados:**
 ```
 Authorization: Bearer [token]
 ```
 
-**Example Request (cURL):**
+**Ejemplo de Solicitud (cURL):**
 ```bash
 curl -X GET http://localhost:8080/api/users/550e8400-e29b-41d4-a716-446655440000 \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
 ```
 
-**Example Success Response (200 OK):**
+**Respuesta de Éxito (200 OK):**
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john.doe@gmail.com",
+  "firstName": "Juan",
+  "lastName": "Pérez",
+  "email": "juan.perez@gmail.com",
   "phoneNumber": "+573103212753",
   "direction": "Calle 123 #45-67",
   "role": "USER",
@@ -256,40 +256,40 @@ curl -X GET http://localhost:8080/api/users/550e8400-e29b-41d4-a716-446655440000
 }
 ```
 
-**Possible Errors:**
-- `401 Unauthorized` - Invalid or expired token
-- `404 Not Found` - User not found
+**Posibles Errores:**
+- `401 Unauthorized` - Token inválido o expirado
+- `404 Not Found` - Usuario no encontrado
 
 ---
 
-### 3. Get Current User Profile
+### 3. Obtener Perfil de Usuario Actual
 
-**Description:** Retrieve the profile of the authenticated user.
+**Descripción:** Recuperar el perfil del usuario autenticado.
 
-**Method:** `GET`
+**Método:** `GET`
 
 **URL:** `/api/users/me`
 
-**Authentication:** Required
+**Autenticación:** Requerida
 
-**Headers:**
+**Encabezados:**
 ```
 Authorization: Bearer [token]
 ```
 
-**Example Request (cURL):**
+**Ejemplo de Solicitud (cURL):**
 ```bash
 curl -X GET http://localhost:8080/api/users/me \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
 ```
 
-**Example Success Response (200 OK):**
+**Respuesta de Éxito (200 OK):**
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john.doe@gmail.com",
+  "firstName": "Juan",
+  "lastName": "Pérez",
+  "email": "juan.perez@gmail.com",
   "phoneNumber": "+573103212753",
   "direction": "Calle 123 #45-67",
   "role": "USER",
@@ -298,128 +298,128 @@ curl -X GET http://localhost:8080/api/users/me \
 }
 ```
 
-**Possible Errors:**
-- `401 Unauthorized` - Invalid or expired token
-- `404 Not Found` - User not found
+**Posibles Errores:**
+- `401 Unauthorized` - Token inválido o expirado
+- `404 Not Found` - Usuario no encontrado
 
 ---
 
-### 4. Get Active Users
+### 4. Obtener Usuarios Activos
 
-**Description:** Retrieve all active users. Only for ADMIN users.
+**Descripción:** Recuperar todos los usuarios activos. Solo para usuarios ADMIN.
 
-**Method:** `GET`
+**Método:** `GET`
 
 **URL:** `/api/users/active`
 
-**Authentication:** Required
+**Autenticación:** Requerida
 
-**Authorization:** ADMIN role only
+**Autorización:** Solo rol ADMIN
 
-**Headers:**
+**Encabezados:**
 ```
 Authorization: Bearer [token]
 ```
 
-**Example Request (cURL):**
+**Ejemplo de Solicitud (cURL):**
 ```bash
 curl -X GET http://localhost:8080/api/users/active \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
 ```
 
-**Possible Errors:**
-- `401 Unauthorized` - Invalid or expired token
-- `403 Forbidden` - User is not an admin
+**Posibles Errores:**
+- `401 Unauthorized` - Token inválido o expirado
+- `403 Forbidden` - El usuario no es administrador
 
 ---
 
-### 5. Get Users by Role
+### 5. Obtener Usuarios por Rol
 
-**Description:** Retrieve all users with a specific role. Only for ADMIN users.
+**Descripción:** Recuperar todos los usuarios con un rol específico. Solo para usuarios ADMIN.
 
-**Method:** `GET`
+**Método:** `GET`
 
 **URL:** `/api/users/role/{role}`
 
-**Authentication:** Required
+**Autenticación:** Requerida
 
-**Authorization:** ADMIN role only
+**Autorización:** Solo rol ADMIN
 
-**URL Parameters:**
-| Parameter | Type | Required | Description |
+**Parámetros de URL:**
+| Parámetro | Tipo | Requerido | Descripción |
 |-----------|------|----------|------------|
-| role | String | Yes | USER or ADMIN |
+| role | String | Sí | USER o ADMIN |
 
-**Headers:**
+**Encabezados:**
 ```
 Authorization: Bearer [token]
 ```
 
-**Example Request (cURL):**
+**Ejemplo de Solicitud (cURL):**
 ```bash
 curl -X GET http://localhost:8080/api/users/role/ADMIN \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
 ```
 
-**Possible Errors:**
-- `401 Unauthorized` - Invalid or expired token
-- `403 Forbidden` - User is not an admin
+**Posibles Errores:**
+- `401 Unauthorized` - Token inválido o expirado
+- `403 Forbidden` - El usuario no es administrador
 
 ---
 
-### 6. Update User
+### 6. Actualizar Usuario
 
-**Description:** Update user information. Users can update their own data, admins can update any user.
+**Descripción:** Actualizar información del usuario. Los usuarios pueden actualizar sus propios datos, los administradores pueden actualizar cualquier usuario.
 
-**Method:** `PUT`
+**Método:** `PUT`
 
 **URL:** `/api/users/{id}`
 
-**Authentication:** Required
+**Autenticación:** Requerida
 
-**Authorization:** User can update own profile or must be ADMIN
+**Autorización:** El usuario puede actualizar su propio perfil o debe ser ADMIN
 
-**URL Parameters:**
-| Parameter | Type | Required | Description |
+**Parámetros de URL:**
+| Parámetro | Tipo | Requerido | Descripción |
 |-----------|------|----------|------------|
-| id | UUID | Yes | Unique user ID |
+| id | UUID | Sí | ID único del usuario |
 
-**Headers:**
+**Encabezados:**
 ```
 Authorization: Bearer [token]
 Content-Type: application/json
 ```
 
-**Body Parameters:**
-| Parameter | Type | Required | Description |
+**Parámetros del Cuerpo:**
+| Parámetro | Tipo | Requerido | Descripción |
 |-----------|------|----------|------------|
-| firstName | String | No | First name |
-| lastName | String | No | Last name |
-| email | String | No | Email (must be unique) |
-| password | String | No | New password (will be encrypted) |
-| phoneNumber | String | No | Phone number |
-| direction | String | No | Address |
-| role | String | No | USER or ADMIN (only ADMIN can change) |
-| active | Boolean | No | Account status (only ADMIN can change) |
+| firstName | String | No | Nombre |
+| lastName | String | No | Apellido |
+| email | String | No | Correo electrónico (debe ser único) |
+| password | String | No | Nueva contraseña (será encriptada) |
+| phoneNumber | String | No | Número de teléfono |
+| direction | String | No | Dirección |
+| role | String | No | USER o ADMIN (solo ADMIN puede cambiar) |
+| active | Boolean | No | Estado de cuenta (solo ADMIN puede cambiar) |
 
-**Example Request (cURL):**
+**Ejemplo de Solicitud (cURL):**
 ```bash
 curl -X PUT http://localhost:8080/api/users/550e8400-e29b-41d4-a716-446655440000 \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..." \
   -H "Content-Type: application/json" \
   -d '{
-    "firstName": "Jane",
+    "firstName": "María",
     "phoneNumber": "+573109876543"
   }'
 ```
 
-**Example Success Response (200 OK):**
+**Respuesta de Éxito (200 OK):**
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
-  "firstName": "Jane",
-  "lastName": "Doe",
-  "email": "john.doe@gmail.com",
+  "firstName": "María",
+  "lastName": "Pérez",
+  "email": "juan.perez@gmail.com",
   "phoneNumber": "+573109876543",
   "direction": "Calle 123 #45-67",
   "role": "USER",
@@ -428,86 +428,86 @@ curl -X PUT http://localhost:8080/api/users/550e8400-e29b-41d4-a716-446655440000
 }
 ```
 
-**Possible Errors:**
-- `400 Bad Request` - Email already in use
-- `401 Unauthorized` - Invalid or expired token
-- `403 Forbidden` - Not authorized to update this user
-- `404 Not Found` - User not found
+**Posibles Errores:**
+- `400 Bad Request` - Correo electrónico ya en uso
+- `401 Unauthorized` - Token inválido o expirado
+- `403 Forbidden` - No autorizado para actualizar este usuario
+- `404 Not Found` - Usuario no encontrado
 
 ---
 
-### 7. Delete User
+### 7. Eliminar Usuario
 
-**Description:** Permanently delete a user from the system. Only for ADMIN users.
+**Descripción:** Eliminar permanentemente un usuario del sistema. Solo para usuarios ADMIN.
 
-**Method:** `DELETE`
+**Método:** `DELETE`
 
 **URL:** `/api/users/{id}`
 
-**Authentication:** Required
+**Autenticación:** Requerida
 
-**Authorization:** ADMIN role only
+**Autorización:** Solo rol ADMIN
 
-**URL Parameters:**
-| Parameter | Type | Required | Description |
+**Parámetros de URL:**
+| Parámetro | Tipo | Requerido | Descripción |
 |-----------|------|----------|------------|
-| id | UUID | Yes | Unique user ID |
+| id | UUID | Sí | ID único del usuario |
 
-**Headers:**
+**Encabezados:**
 ```
 Authorization: Bearer [token]
 ```
 
-**Example Request (cURL):**
+**Ejemplo de Solicitud (cURL):**
 ```bash
 curl -X DELETE http://localhost:8080/api/users/550e8400-e29b-41d4-a716-446655440000 \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
 ```
 
-**Example Success Response (204 No Content)**
+**Respuesta de Éxito (204 Sin Contenido)**
 
-**Possible Errors:**
-- `401 Unauthorized` - Invalid or expired token
-- `403 Forbidden` - User is not an admin
-- `404 Not Found` - User not found
+**Posibles Errores:**
+- `401 Unauthorized` - Token inválido o expirado
+- `403 Forbidden` - El usuario no es administrador
+- `404 Not Found` - Usuario no encontrado
 
 ---
 
-### 8. Deactivate User
+### 8. Desactivar Usuario
 
-**Description:** Soft delete - deactivate a user without removing from database. Only for ADMIN users.
+**Descripción:** Eliminación suave - desactivar un usuario sin eliminarlo de la base de datos. Solo para usuarios ADMIN.
 
-**Method:** `PATCH`
+**Método:** `PATCH`
 
 **URL:** `/api/users/{id}/deactivate`
 
-**Authentication:** Required
+**Autenticación:** Requerida
 
-**Authorization:** ADMIN role only
+**Autorización:** Solo rol ADMIN
 
-**URL Parameters:**
-| Parameter | Type | Required | Description |
+**Parámetros de URL:**
+| Parámetro | Tipo | Requerido | Descripción |
 |-----------|------|----------|------------|
-| id | UUID | Yes | Unique user ID |
+| id | UUID | Sí | ID único del usuario |
 
-**Headers:**
+**Encabezados:**
 ```
 Authorization: Bearer [token]
 ```
 
-**Example Request (cURL):**
+**Ejemplo de Solicitud (cURL):**
 ```bash
 curl -X PATCH http://localhost:8080/api/users/550e8400-e29b-41d4-a716-446655440000/deactivate \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
 ```
 
-**Example Success Response (200 OK):**
+**Respuesta de Éxito (200 OK):**
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john.doe@gmail.com",
+  "firstName": "Juan",
+  "lastName": "Pérez",
+  "email": "juan.perez@gmail.com",
   "phoneNumber": "+573103212753",
   "direction": "Calle 123 #45-67",
   "role": "USER",
@@ -518,24 +518,24 @@ curl -X PATCH http://localhost:8080/api/users/550e8400-e29b-41d4-a716-4466554400
 
 ---
 
-### 9. Activate User
+### 9. Activar Usuario
 
-**Description:** Reactivate a deactivated user. Only for ADMIN users.
+**Descripción:** Reactivar un usuario desactivado. Solo para usuarios ADMIN.
 
-**Method:** `PATCH`
+**Método:** `PATCH`
 
 **URL:** `/api/users/{id}/activate`
 
-**Authentication:** Required
+**Autenticación:** Requerida
 
-**Authorization:** ADMIN role only
+**Autorización:** Solo rol ADMIN
 
-**Headers:**
+**Encabezados:**
 ```
 Authorization: Bearer [token]
 ```
 
-**Example Request (cURL):**
+**Ejemplo de Solicitud (cURL):**
 ```bash
 curl -X PATCH http://localhost:8080/api/users/550e8400-e29b-41d4-a716-446655440000/activate \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
@@ -543,129 +543,129 @@ curl -X PATCH http://localhost:8080/api/users/550e8400-e29b-41d4-a716-4466554400
 
 ---
 
-## Image Management Endpoints
+## Puntos Finales de Gestión de Imágenes
 
-### 1. Upload Image
+### 1. Cargar Imagen
 
-**Description:** Upload a new image to the system.
+**Descripción:** Cargar una nueva imagen al sistema.
 
-**Method:** `POST`
+**Método:** `POST`
 
 **URL:** `/api/v1/images/upload`
 
-**Authentication:** Required
+**Autenticación:** Requerida
 
-**Headers:**
+**Encabezados:**
 ```
 Authorization: Bearer [token]
 Content-Type: multipart/form-data
 ```
 
-**Body Parameters:**
-| Parameter | Type | Required | Description |
+**Parámetros del Cuerpo:**
+| Parámetro | Tipo | Requerido | Descripción |
 |-----------|------|----------|------------|
-| file | File | Yes | Image file (max 10MB) |
+| file | File | Sí | Archivo de imagen (máximo 10MB) |
 
-**Supported Formats:** .png, .jpg, .jpeg, .gif, .bmp
+**Formatos Soportados:** .png, .jpg, .jpeg, .gif, .bmp
 
-**Example Request (cURL):**
+**Ejemplo de Solicitud (cURL):**
 ```bash
 curl -X POST http://localhost:8080/api/v1/images/upload \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..." \
-  -F "file=@path/to/image.png"
+  -F "file=@ruta/a/imagen.png"
 ```
 
-**Example Success Response (201 Created):**
+**Respuesta de Éxito (201 Creado):**
 ```json
 {
   "success": true,
-  "message": "Image uploaded successfully",
+  "message": "Imagen cargada exitosamente",
   "data": {
     "id": "550e8400-e29b-41d4-a716-446655440000",
-    "userName": "john.doe@gmail.com",
-    "imageName": "my_image.png"
+    "userName": "juan.perez@gmail.com",
+    "imageName": "mi_imagen.png"
   }
 }
 ```
 
-**Possible Errors:**
-- `400 Bad Request` - Invalid file or unsupported format
-- `401 Unauthorized` - Invalid or expired token
-- `500 Internal Server Error` - Server error
+**Posibles Errores:**
+- `400 Bad Request` - Archivo inválido o formato no soportado
+- `401 Unauthorized` - Token inválido o expirado
+- `500 Internal Server Error` - Error del servidor
 
 ---
 
-### 2. Download Image
+### 2. Descargar Imagen
 
-**Description:** Download an original or transformed image.
+**Descripción:** Descargar una imagen original o transformada.
 
-**Method:** `GET`
+**Método:** `GET`
 
 **URL:** `/api/v1/images/{imageId}/download`
 
-**Authentication:** Required
+**Autenticación:** Requerida
 
-**URL Parameters:**
-| Parameter | Type | Required | Description |
+**Parámetros de URL:**
+| Parámetro | Tipo | Requerido | Descripción |
 |-----------|------|----------|------------|
-| imageId | UUID | Yes | Unique image ID |
+| imageId | UUID | Sí | ID único de la imagen |
 
-**Query Parameters:**
-| Parameter | Type | Required | Default | Description |
+**Parámetros de Consulta:**
+| Parámetro | Tipo | Requerido | Por Defecto | Descripción |
 |-----------|------|----------|---------|------------|
-| type | String | No | input | "input" for original or "transform" for transformed |
+| type | String | No | input | "input" para original o "transform" para transformada |
 
-**Headers:**
+**Encabezados:**
 ```
 Authorization: Bearer [token]
 ```
 
-**Example Request (cURL):**
+**Ejemplo de Solicitud (cURL):**
 ```bash
-# Download original image
+# Descargar imagen original
 curl -X GET "http://localhost:8080/api/v1/images/550e8400-e29b-41d4-a716-446655440000/download?type=input" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..." \
-  -o image.png
+  -o imagen.png
 
-# Download transformed image
+# Descargar imagen transformada
 curl -X GET "http://localhost:8080/api/v1/images/550e8400-e29b-41d4-a716-446655440000/download?type=transform" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..." \
-  -o image_transformed.png
+  -o imagen_transformada.png
 ```
 
-**Response:** Binary image file
+**Respuesta:** Archivo de imagen binario
 
-**Possible Errors:**
-- `400 Bad Request` - Invalid type parameter
-- `401 Unauthorized` - Invalid or expired token
-- `404 Not Found` - Image not found
+**Posibles Errores:**
+- `400 Bad Request` - Parámetro de tipo inválido
+- `401 Unauthorized` - Token inválido o expirado
+- `404 Not Found` - Imagen no encontrada
 
 ---
 
-### 3. Transform Image
+### 3. Transformar Imagen
 
-**Description:** Apply transformations to an image using various strategies.
+**Descripción:** Aplicar transformaciones a una imagen usando varias estrategias.
 
-**Method:** `POST`
+**Método:** `POST`
 
 **URL:** `/api/v1/images/{imageId}/transform`
 
-**Authentication:** Required
+**Autenticación:** Requerida
 
-**URL Parameters:**
-| Parameter | Type | Required | Description |
+**Parámetros de URL:**
+| Parámetro | Tipo | Requerido | Descripción |
 |-----------|------|----------|------------|
-| imageId | UUID | Yes | Unique image ID |
+| imageId | UUID | Sí | ID único de la imagen |
 
-**Headers:**
+**Encabezados:**
 ```
 Authorization: Bearer [token]
 Content-Type: application/json
 ```
 
-**Transformation Types:**
+**Tipos de Transformación:**
 
-#### Resize
+#### Redimensionar
 ```json
 {
   "resize": {
@@ -675,7 +675,7 @@ Content-Type: application/json
 }
 ```
 
-#### Crop
+#### Recortar
 ```json
 {
   "crop": {
@@ -687,14 +687,14 @@ Content-Type: application/json
 }
 ```
 
-#### Rotate
+#### Rotar
 ```json
 {
   "rotate": 45
 }
 ```
 
-#### Filter - Grayscale
+#### Filtro - Escala de Grises
 ```json
 {
   "filters": {
@@ -703,7 +703,7 @@ Content-Type: application/json
 }
 ```
 
-#### Filter - Sepia
+#### Filtro - Sepia
 ```json
 {
   "filters": {
@@ -712,16 +712,16 @@ Content-Type: application/json
 }
 ```
 
-#### Format Conversion
+#### Conversión de Formato
 ```json
 {
   "format": "jpg"
 }
 ```
 
-**Supported Formats:** jpg, jpeg, png, gif, bmp, webp
+**Formatos Soportados:** jpg, jpeg, png, gif, bmp, webp
 
-**Example Request (cURL) - Resize:**
+**Ejemplo de Solicitud (cURL) - Redimensionar:**
 ```bash
 curl -X POST "http://localhost:8080/api/v1/images/550e8400-e29b-41d4-a716-446655440000/transform" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..." \
@@ -734,63 +734,63 @@ curl -X POST "http://localhost:8080/api/v1/images/550e8400-e29b-41d4-a716-446655
   }'
 ```
 
-**Example Success Response (200 OK):**
+**Respuesta de Éxito (200 OK):**
 ```json
 {
   "success": true,
-  "message": "Transformation completed successfully",
-  "data": "D:\\Tech\\images\\input\\user@gmail.com\\550e8400-e29b-41d4-a716-446655440000\\image_transform.png"
+  "message": "Transformación completada exitosamente",
+  "data": "D:\\Tech\\images\\input\\usuario@gmail.com\\550e8400-e29b-41d4-a716-446655440000\\imagen_transform.png"
 }
 ```
 
-**Possible Errors:**
-- `400 Bad Request` - Invalid parameters
-- `401 Unauthorized` - Invalid or expired token
-- `404 Not Found` - Image not found
-- `500 Internal Server Error` - Transformation error
+**Posibles Errores:**
+- `400 Bad Request` - Parámetros inválidos
+- `401 Unauthorized` - Token inválido o expirado
+- `404 Not Found` - Imagen no encontrada
+- `500 Internal Server Error` - Error de transformación
 
 ---
 
-### 4. Get User Images
+### 4. Obtener Imágenes del Usuario
 
-**Description:** Retrieve all images for the authenticated user with pagination.
+**Descripción:** Recuperar todas las imágenes del usuario autenticado con paginación.
 
-**Method:** `GET`
+**Método:** `GET`
 
 **URL:** `/api/v1/images/user/all`
 
-**Authentication:** Required
+**Autenticación:** Requerida
 
-**Query Parameters:**
-| Parameter | Type | Required | Default | Description |
+**Parámetros de Consulta:**
+| Parámetro | Tipo | Requerido | Por Defecto | Descripción |
 |-----------|------|----------|---------|------------|
-| page | Integer | No | 0 | Page number (starts at 0) |
-| size | Integer | No | 10 | Results per page |
+| page | Integer | No | 0 | Número de página (comienza en 0) |
+| size | Integer | No | 10 | Resultados por página |
 
-**Headers:**
+**Encabezados:**
 ```
 Authorization: Bearer [token]
 ```
 
-**Example Request (cURL):**
+**Ejemplo de Solicitud (cURL):**
 ```bash
 curl -X GET "http://localhost:8080/api/v1/images/user/all?page=0&size=10" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
 ```
 
-**Example Success Response (200 OK):**
+**Respuesta de Éxito (200 OK):**
 ```json
 {
   "success": true,
-  "message": "Images retrieved successfully",
+  "message": "Imágenes recuperadas exitosamente",
   "data": {
     "content": [
       {
         "id": "550e8400-e29b-41d4-a716-446655440000",
-        "userName": "john.doe@gmail.com",
-        "imageName": "my_image.png",
-        "inputPath": "D:\\Tech\\images\\input\\john.doe@gmail.com\\550e8400-e29b-41d4-a716-446655440000\\my_image.png",
-        "transformPath": "D:\\Tech\\images\\input\\john.doe@gmail.com\\550e8400-e29b-41d4-a716-446655440000\\my_image_transform.png",
+        "userName": "juan.perez@gmail.com",
+        "imageName": "mi_imagen.png",
+        "inputPath": "D:\\Tech\\images\\input\\juan.perez@gmail.com\\550e8400-e29b-41d4-a716-446655440000\\mi_imagen.png",
+        "transformPath": "D:\\Tech\\images\\input\\juan.perez@gmail.com\\550e8400-e29b-41d4-a716-446655440000\\mi_imagen_transform.png",
         "registrationDate": "2025-11-20T15:22:40",
         "dateOfUpdate": "2025-11-20T15:22:43",
         "hasTransformation": true
@@ -802,39 +802,39 @@ curl -X GET "http://localhost:8080/api/v1/images/user/all?page=0&size=10" \
 }
 ```
 
-**Possible Errors:**
-- `401 Unauthorized` - Invalid or expired token
-- `404 Not Found` - User has no images
+**Posibles Errores:**
+- `401 Unauthorized` - Token inválido o expirado
+- `404 Not Found` - El usuario no tiene imágenes
 
 ---
 
-## HTTP Status Codes
+## Códigos de Estado HTTP
 
-| Code | Description |
-|------|------------|
-| 200 | OK - Request successful |
-| 201 | Created - Resource created successfully |
-| 204 | No Content - Successful deletion |
-| 400 | Bad Request - Invalid request or parameters |
-| 401 | Unauthorized - Invalid or expired JWT token |
-| 403 | Forbidden - User lacks required permissions |
-| 404 | Not Found - Resource not found |
-| 500 | Internal Server Error - Server error |
+| Código | Descripción |
+|--------|------------|
+| 200 | OK - Solicitud exitosa |
+| 201 | Creado - Recurso creado exitosamente |
+| 204 | Sin Contenido - Eliminación exitosa |
+| 400 | Solicitud Incorrecta - Solicitud o parámetros inválidos |
+| 401 | No Autorizado - Token JWT inválido o expirado |
+| 403 | Prohibido - El usuario no tiene permisos requeridos |
+| 404 | No Encontrado - Recurso no encontrado |
+| 500 | Error Interno del Servidor - Error del servidor |
 
 ---
 
-## Model Structures
+## Estructuras de Modelos
 
-### User Model
+### Modelo de Usuario
 ```json
 {
   "id": "uuid",
   "firstName": "string",
   "lastName": "string",
-  "email": "string (unique)",
+  "email": "string (único)",
   "phoneNumber": "string",
   "direction": "string",
-  "role": "USER or ADMIN",
+  "role": "USER o ADMIN",
   "registrationDate": "2025-11-20T15:22:40",
   "active": "boolean",
   "createdBy": "string",
@@ -844,34 +844,34 @@ curl -X GET "http://localhost:8080/api/v1/images/user/all?page=0&size=10" \
 }
 ```
 
-### ImageMetadata Model
+### Modelo de Metadatos de Imagen
 ```json
 {
   "id": "uuid",
   "userName": "string",
   "imageName": "string",
   "inputPath": "string",
-  "transformPath": "string or null",
-  "description": "string or null",
+  "transformPath": "string o null",
+  "description": "string o null",
   "registrationDate": "2025-11-20T15:22:40",
   "dateOfUpdate": "2025-11-20T15:22:43",
   "hasTransformation": "boolean"
 }
 ```
 
-### AuthResponse Model
+### Modelo de Respuesta de Autenticación
 ```json
 {
-  "token": "jwt-token-string",
+  "token": "string-token-jwt",
   "email": "string",
   "firstName": "string",
   "lastName": "string",
-  "role": "USER or ADMIN",
+  "role": "USER o ADMIN",
   "message": "string"
 }
 ```
 
-### TransformRequestDto Model
+### Modelo TransformRequestDto
 ```json
 {
   "resize": {
@@ -895,263 +895,64 @@ curl -X GET "http://localhost:8080/api/v1/images/user/all?page=0&size=10" \
 
 ---
 
-## Typical Usage Flow
+## Flujo de Uso Típico
 
-### User Registration and Authentication
+### Registro y Autenticación de Usuarios
 
-1. **Register new user:**
+1. **Registrar nuevo usuario:**
    ```
    POST /api/auth/register
    ```
 
-2. **Login:**
+2. **Iniciar sesión:**
    ```
    POST /api/auth/login
    ```
 
-3. **Get current user profile:**
+3. **Obtener perfil de usuario actual:**
    ```
    GET /api/users/me
    ```
 
-### Image Management
+### Gestión de Imágenes
 
-1. **Upload image:**
+1. **Cargar imagen:**
    ```
    POST /api/v1/images/upload
    ```
 
-2. **Get user images:**
+2. **Obtener imágenes del usuario:**
    ```
    GET /api/v1/images/user/all
    ```
 
-3. **Apply transformation:**
+3. **Aplicar transformación:**
    ```
    POST /api/v1/images/{imageId}/transform
    ```
 
-4. **Download transformed image:**
+4. **Descargar imagen transformada:**
    ```
    GET /api/v1/images/{imageId}/download?type=transform
    ```
 
 ---
 
-## Security Features
+## Características de Seguridad
 
-- JWT token-based authentication with configurable expiration
-- Role-based access control (RBAC) for ADMIN and USER roles
-- Password encryption using BCrypt
-- Email validation and uniqueness checking
-- Soft delete capability for user accounts
-- Audit trail tracking (created by, creation date, last modified by, last modified date)
-- CORS configuration for specific origins
-- Method-level security using @PreAuthorize annotations
-- Email notifications via SendGrid for user registration
-
----
-
-## Important Notes
-
-- All authenticated endpoints require a valid JWT bearer token
-- Users can only access their own images
-- Only ADMIN users can manage other users
-- Image file maximum size is 10MB
-- Images are organized by user email in the storage directory
-- Transformations are applied to copies with "_transform" suffix
-- Original files are never modified directly
-- All user passwords are encrypted before storage
-- Welcome emails are sent automatically on user registration
+- Autenticación basada en token JWT con expiración configurable
+- Control de acceso basado en roles (RBAC) para roles ADMIN y USER
+- Encriptación de contraseña usando BCrypt
+- Validación de correo electrónico y verificación de unicidad
+- Capacidad de eliminación suave para cuentas de usuario
+- Seguimiento de pista de auditoría (creado por, fecha de creación, última modificación por, fecha de última modificación)
+- Configuración CORS para orígenes específicos
+- Seguridad a nivel de método usando anotaciones @PreAuthorize
+- Notificaciones por correo electrónico a través de SendGrid para registro de usuario
 
 ---
 
-## Configuration Properties
+## Notas Importantes
 
-### Application Configuration
-
-The following properties should be configured in `application.properties`:
-
-**Database Configuration:**
-```properties
-spring.datasource.url=${URL_DB}
-spring.datasource.username=${USER_NAME}
-spring.datasource.password=${PASSWORD_DB}
-spring.datasource.driver-class-name=org.postgresql.Driver
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-```
-
-**Hibernate Configuration:**
-```properties
-spring.jpa.show-sql=true
-spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-spring.jpa.properties.hibernate.format_sql=false
-```
-
-**JWT Configuration:**
-```properties
-jwt.secret.key=${TOKEN_JWT}
-jwt.expiration.time=86400000
-```
-
-**Server Configuration:**
-```properties
-spring.application.name=ImageHub
-server.port=8080
-```
-
-**Email Configuration (SendGrid):**
-```properties
-sendgrid.api.key=${SENDGRID_API_KEY}
-user.name.email=${USER_NAME_MAIL}
-```
-
-**Swagger/OpenAPI Documentation:**
-```properties
-springdoc.swagger-ui.path=/swagger-ui.html
-springdoc.api-docs.path=/v3/api-docs
-springdoc.swagger-ui.operationsSorter=method
-```
-
-**File Upload Configuration:**
-```properties
-spring.servlet.multipart.max-file-size=5MB
-spring.servlet.multipart.max-request-size=5MB
-```
-
-**Image Storage Configuration:**
-```properties
-image.input.path=D:\\Tech\\images\\input
-image.output.path=D:\\Tech\\images\\output
-image.supported-formats=jpg,jpeg,png
-```
-
-### Environment Variables
-
-The following environment variables must be set in your system or `.env` file:
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `URL_DB` | PostgreSQL database URL | jdbc:postgresql://localhost:5432/imagehub |
-| `USER_NAME` | Database username | postgres |
-| `PASSWORD_DB` | Database password | your_secure_password |
-| `TOKEN_JWT` | Base64 encoded JWT secret key | base64_encoded_secret_key_here |
-| `SENDGRID_API_KEY` | SendGrid API key for email | SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx |
-| `USER_NAME_MAIL` | Email sender address | noreply@imagehub.com |
-
-### Complete application.properties File
-
-```properties
-# Application Configuration
-spring.application.name=ImageHub
-server.port=8080
-
-# Database Configuration
-spring.datasource.url=${URL_DB}
-spring.datasource.username=${USER_NAME}
-spring.datasource.password=${PASSWORD_DB}
-spring.datasource.driver-class-name=org.postgresql.Driver
-
-# JPA/Hibernate Configuration
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-spring.jpa.show-sql=true
-spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-spring.jpa.properties.hibernate.format_sql=false
-
-# JWT Configuration
-jwt.secret.key=${TOKEN_JWT}
-jwt.expiration.time=86400000
-
-# SendGrid Email Configuration
-sendgrid.api.key=${SENDGRID_API_KEY}
-user.name.email=${USER_NAME_MAIL}
-
-# Swagger/OpenAPI Documentation
-springdoc.swagger-ui.path=/swagger-ui.html
-springdoc.api-docs.path=/v3/api-docs
-springdoc.swagger-ui.operationsSorter=method
-
-# File Upload Configuration
-spring.servlet.multipart.max-file-size=5MB
-spring.servlet.multipart.max-request-size=5MB
-
-# Image Storage Configuration
-image.input.path=D:\\Tech\\images\\input
-image.output.path=D:\\Tech\\images\\output
-image.supported-formats=jpg,jpeg,png
-```
-
-### Setup Instructions
-
-1. **Create directories for image storage:**
-   ```bash
-   mkdir -p D:\Tech\images\input
-   mkdir -p D:\Tech\images\output
-   ```
-
-2. **Set up PostgreSQL database:**
-    - Create a database named `imagehub`
-    - Ensure PostgreSQL is running on localhost:5432
-
-3. **Configure environment variables:**
-    - Set `URL_DB`, `USER_NAME`, `PASSWORD_DB` for database connection
-    - Set `TOKEN_JWT` with a secure base64-encoded secret key
-    - Set `SENDGRID_API_KEY` from your SendGrid account
-    - Set `USER_NAME_MAIL` for the email sender address
-
-4. **Alternative: Use .env file with Spring Profile:**
-    - Create `.env` file in project root
-    - Load environment variables using `@Value` annotation
-    - Or use Spring Cloud Config for centralized configuration
-
----
-
-## Complete Usage Example
-
-```bash
-# 1. Register new user
-REGISTER_RESPONSE=$(curl -X POST http://localhost:8080/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "firstName": "John",
-    "lastName": "Doe",
-    "email": "john.doe@gmail.com",
-    "password": "SecurePassword123!",
-    "phoneNumber": "+573103212753",
-    "direction": "Calle 123 #45-67"
-  }')
-
-TOKEN=$(echo $REGISTER_RESPONSE | jq -r '.token')
-
-# 2. Upload image
-UPLOAD_RESPONSE=$(curl -X POST http://localhost:8080/api/v1/images/upload \
-  -H "Authorization: Bearer $TOKEN" \
-  -F "file=@image.png")
-
-IMAGE_ID=$(echo $UPLOAD_RESPONSE | jq -r '.data.id')
-
-# 3. Apply transformation
-curl -X POST "http://localhost:8080/api/v1/images/$IMAGE_ID/transform" \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"resize": {"width": 100, "height": 100}}'
-
-# 4. Download transformed image
-curl -X GET "http://localhost:8080/api/v1/images/$IMAGE_ID/download?type=transform" \
-  -H "Authorization: Bearer $TOKEN" \
-  -o result.png
-
-# 5. Get user profile
-curl -X GET http://localhost:8080/api/users/me \
-  -H "Authorization: Bearer $TOKEN"
-
-# 6. Get user images
-curl -X GET "http://localhost:8080/api/v1/images/user/all?page=0&size=10" \
-  -H "Authorization: Bearer $TOKEN"
-```
-
----
-
-## Support
-
-For bug reports or feature requests, please contact the development team at bmtechnologicalsolutions@gmail.com
+- Todos los puntos finales autenticados requieren un token bearer JWT válido
+- Los usuarios solo pueden acceder a sus propias imág
