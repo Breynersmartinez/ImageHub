@@ -27,11 +27,16 @@ import java.util.UUID;
 @CrossOrigin(origins = "*")
 public class ImageController {
 
-    @Autowired
-    private FileStorageService fileStorageService;
 
-    @Autowired
-    private ImageProcService imageProcService;
+    private final FileStorageService fileStorageService;
+
+    private final ImageProcService imageProcService;
+
+
+    public ImageController(FileStorageService fileStorageService, ImageProcService imageProcService) {
+        this.fileStorageService = fileStorageService;
+        this.imageProcService = imageProcService;
+    }
 
     /**
      * Sube una nueva imagen
@@ -145,4 +150,112 @@ public class ImageController {
                     .body(ApiResponse.error(e.getMessage(), "No se encontraron imágenes"));
         }
     }
+
+
+    // Agregar estos 3 métodos al final de tu ImageController (antes del cierre de clase)
+
+    /**
+     * Elimina una imagen específica (archivos + metadata)
+     */
+    @DeleteMapping("/{imageId}")
+    public ResponseEntity<ApiResponse<String>> deleteImage(
+            @PathVariable String imageId,
+            Authentication authentication) {
+
+        try {
+            String userName = authentication.getName();
+            log.info("Solicitud de eliminación de imagen: {} por usuario: {}", imageId, userName);
+
+            fileStorageService.deleteImage(imageId, userName);
+
+            return ResponseEntity.ok()
+                    .body(ApiResponse.success(imageId, "Imagen eliminada exitosamente"));
+
+        } catch (IOException e) {
+            log.error("Error: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(e.getMessage(), "Imagen no encontrada"));
+
+        } catch (IllegalArgumentException e) {
+            log.error("UUID inválido: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(e.getMessage(), "Solicitud inválida"));
+
+        } catch (Exception e) {
+            log.error("Error inesperado: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(e.getMessage(), "Error al eliminar imagen"));
+        }
+    }
+
+
+    /**
+     * Elimina solo la metadata (mantiene archivos en servidor)
+     */
+    @DeleteMapping("/{imageId}/metadata-only")
+    public ResponseEntity<ApiResponse<String>> deleteImageMetadataOnly(
+            @PathVariable String imageId,
+            Authentication authentication) {
+
+        try {
+            String userName = authentication.getName();
+            log.info("Eliminando metadata de imagen: {}", imageId);
+
+            fileStorageService.deleteImageMetadataOnly(imageId, userName);
+
+            return ResponseEntity.ok()
+                    .body(ApiResponse.success(
+                            imageId,
+                            "Metadata eliminada. Los archivos se mantienen en el servidor"
+                    ));
+
+        } catch (IOException e) {
+            log.error("Error: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(e.getMessage(), "Imagen no encontrada"));
+
+        } catch (IllegalArgumentException e) {
+            log.error("UUID inválido: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(e.getMessage(), "ID inválido"));
+
+        } catch (Exception e) {
+            log.error("Error inesperado: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(e.getMessage(), "Error al eliminar metadata"));
+        }
+    }
+
+
+    /**
+     * Elimina todas las imágenes del usuario
+     */
+    @DeleteMapping("/user/all")
+    public ResponseEntity<ApiResponse<String>> deleteAllUserImages(
+            Authentication authentication) {
+
+        try {
+            String userName = authentication.getName();
+            log.info("Solicitud de eliminación de todas las imágenes del usuario: {}", userName);
+
+            int deletedCount = fileStorageService.deleteAllUserImages(userName);
+
+            return ResponseEntity.ok()
+                    .body(ApiResponse.success(
+                            String.valueOf(deletedCount),
+                            "Se eliminaron " + deletedCount + " imágenes"
+                    ));
+
+        } catch (IOException e) {
+            log.warn("Información: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(e.getMessage(), "Sin imágenes para eliminar"));
+
+        } catch (Exception e) {
+            log.error("Error al eliminar imágenes: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(e.getMessage(), "Error al eliminar imágenes"));
+        }
+    }
+
 }

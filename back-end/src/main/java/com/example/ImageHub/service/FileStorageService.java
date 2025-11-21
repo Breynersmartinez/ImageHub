@@ -88,14 +88,14 @@ public class FileStorageService {
         return uuidImage.toString();
     }
 
-    /**
+    /*
      * Recupera una imagen como Spring Resource.
      * CORREGIDO: Usando FileSystemResource en lugar de UrlResource
      *
-     * @param imageId UUID de la imagen
-     * @param type    "input" para imagen original o "transform" para imagen transformada
-     * @return imagen como Resource
-     * @throws IOException si la imagen no se encuentra o hay error en operaciones
+     *  imageId UUID de la imagen
+     * m type    "input" para imagen original o "transform" para imagen transformada
+     *  imagen como Resource
+     * IOException si la imagen no se encuentra o hay error en operaciones
      */
     public Resource getFile(String imageId, String type) throws IOException {
 
@@ -234,31 +234,110 @@ public class FileStorageService {
     }
 
     /**
-     * Elimina una imagen tanto de disco como de la base de datos.
+     * Elimina una imagen y todos sus archivos asociados de forma segura.
      */
     @Transactional
     public void deleteImage(String imageId, String userName)
-            throws IOException {
+            throws IOException, IllegalArgumentException {
 
         log.info("Eliminando imagen: {} del usuario: {}", imageId, userName);
 
-        Optional<ImageMetadata> imgMeta = imageMetadataRepository
-                .findByIdAndUserName(UUID.fromString(imageId), userName);
+        try {
+            UUID imageUUID = UUID.fromString(imageId);
 
-        if (imgMeta.isEmpty()) {
-            throw new IOException(
-                    "Imagen no encontrada o no pertenece al usuario"
-            );
+            Optional<ImageMetadata> imgMeta = imageMetadataRepository
+                    .findByIdAndUserName(imageUUID, userName);
+
+            if (imgMeta.isEmpty()) {
+                log.warn("Imagen no encontrada o no pertenece al usuario: {}", imageId);
+                throw new IOException("Imagen no encontrada o no tiene permisos para eliminarla");
+            }
+
+            ImageMetadata image = imgMeta.get();
+
+            eliminarArchivosDelSistema(image);
+            eliminarDirectorioVacio(image);
+            imageMetadataRepository.delete(image);
+
+            log.info("Imagen eliminada exitosamente: {}", imageId);
+
+        } catch (IllegalArgumentException e) {
+            log.error("UUID inválido: {}", imageId);
+            throw new IllegalArgumentException("ID de imagen inválido: " + imageId);
         }
+    }
 
-        ImageMetadata image = imgMeta.get();
+    /**
+     * Elimina solo la metadata de la BD sin tocar archivos del disco.
+     * util para recuperación posterior.
+     */
+    @Transactional
+    public void deleteImageMetadataOnly(String imageId, String userName)
+            throws IOException, IllegalArgumentException {
+
+        log.info("Eliminando solo metadata de imagen: {}", imageId);
 
         try {
-            Path inputPath = Paths.get(image.getInputPath());
-            Files.deleteIfExists(inputPath);
-            log.info("Archivo original eliminado: {}", inputPath);
-        } catch (IOException e) {
-            log.error("Error eliminando archivo original: {}", e.getMessage());
+            UUID imageUUID = UUID.fromString(imageId);
+
+            Optional<ImageMetadata> imgMeta = imageMetadataRepository
+                    .findByIdAndUserName(imageUUID, userName);
+
+            if (imgMeta.isEmpty()) {
+                throw new IOException("Imagen no encontrada");
+            }
+
+            imageMetadataRepository.delete(imgMeta.get());
+            log.info("Metadata eliminada sin tocar archivos: {}", imageId);
+
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("UUID inválido: " + imageId);
+        }
+    }
+
+    /**
+     * Elimina todas las imágenes de un usuario.
+     */
+    @Transactional
+    public int deleteAllUserImages(String userName)
+            throws IOException {
+
+        log.info("Eliminando todas las imágenes del usuario: {}", userName);
+
+        java.util.List<ImageMetadata> images = imageMetadataRepository.findByUserName(userName);
+
+        if (images.isEmpty()) {
+            throw new IOException("El usuario no tiene imágenes para eliminar");
+        }
+
+        for (ImageMetadata image : images) {
+            try {
+                eliminarArchivosDelSistema(image);
+                eliminarDirectorioVacio(image);
+            } catch (Exception e) {
+                log.warn("Error eliminando archivos de imagen {}: {}", image.getId(), e.getMessage());
+            }
+        }
+
+        imageMetadataRepository.deleteAll(images);
+        log.info("Se eliminaron {} imágenes del usuario: {}", images.size(), userName);
+
+        return images.size();
+    }
+
+    /*
+     * Metodo privado que elimina los archivos del disco.
+     */
+    private void eliminarArchivosDelSistema(ImageMetadata image) {
+
+        if (image.getInputPath() != null && !image.getInputPath().isEmpty()) {
+            try {
+                Path inputPath = Paths.get(image.getInputPath());
+                Files.deleteIfExists(inputPath);
+                log.info("Archivo original eliminado: {}", inputPath);
+            } catch (IOException e) {
+                log.error("Error eliminando archivo original: {}", e.getMessage());
+            }
         }
 
         if (image.getTransformPath() != null && !image.getTransformPath().isEmpty()) {
@@ -270,9 +349,31 @@ public class FileStorageService {
                 log.error("Error eliminando archivo transformado: {}", e.getMessage());
             }
         }
-
-        imageMetadataRepository.delete(image);
-        log.info("Metadata de imagen eliminada de BD: {}", imageId);
     }
+
+    /*
+     * Meodo privado que elimina el directorio si esta vacío.
+     */
+    private void eliminarDirectorioVacio(ImageMetadata image) {
+        try {
+            if (image.getInputPath() != null) {
+                Path filePath = Paths.get(image.getInputPath());
+                Path dirPath = filePath.getParent();
+
+                if (dirPath != null && Files.exists(dirPath)) {
+                    try (var stream = Files.list(dirPath)) {
+                        if (stream.count() == 0) {
+                            Files.delete(dirPath);
+                            log.info("Directorio vacío eliminado: {}", dirPath);
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.debug("No se pudo eliminar el directorio (probablemente contiene otros archivos): {}",
+                    e.getMessage());
+        }
+    }
+
 
 }

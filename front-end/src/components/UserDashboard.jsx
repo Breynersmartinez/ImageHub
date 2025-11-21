@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LogOut, Plus, Edit2, Trash2, Loader } from 'lucide-react';
 import AuthService from '../services/AuthService';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext.js';
 
 function UserDashboard({ navigateTo }) {
     const { user, logout } = useAuth();
