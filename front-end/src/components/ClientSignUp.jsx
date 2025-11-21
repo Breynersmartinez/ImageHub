@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
+import { AlertCircle, CheckCircle, Loader } from 'lucide-react';
 import logo from "../assets/bm.png";
 
 function ClientSignUp({ navigateTo }) {
     const [formData, setFormData] = useState({
-        idCard: '',
-        identificationType: 'CC',
         firstName: '',
         lastName: '',
         email: '',
@@ -25,36 +24,39 @@ function ClientSignUp({ navigateTo }) {
         });
     };
 
+    const validateForm = () => {
+        if (!formData.firstName?.trim()) return 'El nombre es requerido';
+        if (!formData.lastName?.trim()) return 'El apellido es requerido';
+        if (!formData.email?.trim()) return 'El email es requerido';
+        if (!formData.email.includes('@')) return 'El email no es válido';
+        if (!formData.password) return 'La contraseña es requerida';
+        if (formData.password.length < 6) return 'La contraseña debe tener al menos 6 caracteres';
+        if (formData.password !== formData.confirmPassword) return 'Las contraseñas no coinciden';
+        if (!formData.phoneNumber?.trim()) return 'El teléfono es requerido';
+        if (!formData.direction?.trim()) return 'La dirección es requerida';
+        return null;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsLoading(true);
         setError('');
         setSuccess('');
 
-        // Validaciones básicas
-        if (formData.password !== formData.confirmPassword) {
-            setError('Las contraseñas no coinciden');
-            setIsLoading(false);
+        const validationError = validateForm();
+        if (validationError) {
+            setError(validationError);
             return;
         }
 
-        // Validar longitud mínima de contraseña
-        if (formData.password.length < 3) {
-            setError('La contraseña debe tener al menos 3 caracteres');
-            setIsLoading(false);
-            return;
-        }
+        setIsLoading(true);
 
-        // Crear objeto para enviar al backend
         const registrationData = {
-            idCard: parseInt(formData.idCard),
-            identificationType: formData.identificationType,
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            email: formData.email,
+            firstName: formData.firstName.trim(),
+            lastName: formData.lastName.trim(),
+            email: formData.email.trim(),
             password: formData.password,
-            phoneNumber: formData.phoneNumber,
-            direction: formData.direction,
+            phoneNumber: formData.phoneNumber.trim(),
+            direction: formData.direction.trim(),
             role: "USER"
         };
 
@@ -93,9 +95,9 @@ function ClientSignUp({ navigateTo }) {
 
     return (
         <div className="min-h-screen w-screen flex items-center justify-center bg-slate-900 overflow-y-auto py-12">
-            <div className="w-full max-w-md space-y-8 bg-black p-8 rounded-lg shadow-lg">
+            <div className="w-full max-w-md space-y-8 bg-black p-8 rounded-lg shadow-lg border border-gray-700">
                 <div className="flex flex-col items-center">
-                    <img className="h-20 w-auto mb-4" src={logo} alt="Logo" />
+                    <img className="h-20 w-auto mb-4" src={logo} alt="AlphaBrein Logo" />
                     <h2 className="text-center text-2xl font-bold text-white">
                         Crear Cuenta
                     </h2>
@@ -106,50 +108,10 @@ function ClientSignUp({ navigateTo }) {
 
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="space-y-4">
-                        {/* Tipo de Identificación */}
-                        <div>
-                            <label htmlFor="identificationType" className="block text-sm font-medium text-gray-200 mb-1">
-                                Tipo de Identificación
-                            </label>
-                            <select
-                                id="identificationType"
-                                name="identificationType"
-                                required
-                                value={formData.identificationType}
-                                onChange={handleChange}
-                                disabled={isLoading}
-                                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                            >
-                                <option value="TI">Tarjeta de Identidad (TI)</option>
-                                <option value="CC">Cédula de Ciudadanía (CC)</option>
-                                <option value="NUIP">NUIP</option>
-                                <option value="CE">Cédula de Extranjería (CE)</option>
-                                <option value="P">Pasaporte (P)</option>
-                            </select>
-                        </div>
-
-                        {/* Número de Identificación */}
-                        <div>
-                            <label htmlFor="idCard" className="block text-sm font-medium text-gray-200 mb-1">
-                                Número de Identificación
-                            </label>
-                            <input
-                                id="idCard"
-                                name="idCard"
-                                type="number"
-                                required
-                                value={formData.idCard}
-                                onChange={handleChange}
-                                disabled={isLoading}
-                                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder="Ingrese su número de identificación"
-                            />
-                        </div>
-
                         {/* Nombre */}
                         <div>
-                            <label htmlFor="firstName" className="block text-sm font-medium text-gray-200 mb-1">
-                                Nombre(s)
+                            <label htmlFor="firstName" className="block text-xs font-medium text-gray-300 mb-1">
+                                Nombre *
                             </label>
                             <input
                                 id="firstName"
@@ -159,15 +121,15 @@ function ClientSignUp({ navigateTo }) {
                                 value={formData.firstName}
                                 onChange={handleChange}
                                 disabled={isLoading}
-                                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder="Ingrese su nombre"
+                                placeholder="Ej: Juan"
+                                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition"
                             />
                         </div>
 
                         {/* Apellido */}
                         <div>
-                            <label htmlFor="lastName" className="block text-sm font-medium text-gray-200 mb-1">
-                                Apellido(s)
+                            <label htmlFor="lastName" className="block text-xs font-medium text-gray-300 mb-1">
+                                Apellido *
                             </label>
                             <input
                                 id="lastName"
@@ -177,15 +139,15 @@ function ClientSignUp({ navigateTo }) {
                                 value={formData.lastName}
                                 onChange={handleChange}
                                 disabled={isLoading}
-                                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder="Ingrese su apellido"
+                                placeholder="Ej: Pérez"
+                                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition"
                             />
                         </div>
 
                         {/* Email */}
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-1">
-                                Correo Electrónico
+                            <label htmlFor="email" className="block text-xs font-medium text-gray-300 mb-1">
+                                Correo Electrónico *
                             </label>
                             <input
                                 id="email"
@@ -195,15 +157,15 @@ function ClientSignUp({ navigateTo }) {
                                 value={formData.email}
                                 onChange={handleChange}
                                 disabled={isLoading}
-                                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder="ejemplo@correo.com"
+                                placeholder="usuario@ejemplo.com"
+                                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition"
                             />
                         </div>
 
                         {/* Contraseña */}
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-200 mb-1">
-                                Contraseña
+                            <label htmlFor="password" className="block text-xs font-medium text-gray-300 mb-1">
+                                Contraseña *
                             </label>
                             <input
                                 id="password"
@@ -214,15 +176,15 @@ function ClientSignUp({ navigateTo }) {
                                 value={formData.password}
                                 onChange={handleChange}
                                 disabled={isLoading}
-                                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                 placeholder="Mínimo 6 caracteres"
+                                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition"
                             />
                         </div>
 
                         {/* Confirmar Contraseña */}
                         <div>
-                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-200 mb-1">
-                                Confirmar Contraseña
+                            <label htmlFor="confirmPassword" className="block text-xs font-medium text-gray-300 mb-1">
+                                Confirmar Contraseña *
                             </label>
                             <input
                                 id="confirmPassword"
@@ -233,15 +195,15 @@ function ClientSignUp({ navigateTo }) {
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
                                 disabled={isLoading}
-                                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                 placeholder="Confirme su contraseña"
+                                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition"
                             />
                         </div>
 
                         {/* Teléfono */}
                         <div>
-                            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-200 mb-1">
-                                Número de Teléfono
+                            <label htmlFor="phoneNumber" className="block text-xs font-medium text-gray-300 mb-1">
+                                Número de Teléfono *
                             </label>
                             <input
                                 id="phoneNumber"
@@ -251,15 +213,15 @@ function ClientSignUp({ navigateTo }) {
                                 value={formData.phoneNumber}
                                 onChange={handleChange}
                                 disabled={isLoading}
-                                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder="Ingrese su número telefónico"
+                                placeholder="Ej: +57 1234567890"
+                                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition"
                             />
                         </div>
 
                         {/* Dirección */}
                         <div>
-                            <label htmlFor="direction" className="block text-sm font-medium text-gray-200 mb-1">
-                                Dirección
+                            <label htmlFor="direction" className="block text-xs font-medium text-gray-300 mb-1">
+                                Dirección *
                             </label>
                             <input
                                 id="direction"
@@ -269,20 +231,22 @@ function ClientSignUp({ navigateTo }) {
                                 value={formData.direction}
                                 onChange={handleChange}
                                 disabled={isLoading}
-                                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder="Ingrese su dirección"
+                                placeholder="Ej: Calle 123 # 45-67"
+                                className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition"
                             />
                         </div>
                     </div>
 
                     {error && (
-                        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md">
+                        <div className="bg-red-900 border-l-4 border-red-500 text-red-100 p-4 rounded-md flex items-center gap-2">
+                            <AlertCircle size={18} className="flex-shrink-0" />
                             <p className="text-sm">{error}</p>
                         </div>
                     )}
 
                     {success && (
-                        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md">
+                        <div className="bg-green-900 border-l-4 border-green-500 text-green-100 p-4 rounded-md flex items-center gap-2">
+                            <CheckCircle size={18} className="flex-shrink-0" />
                             <p className="text-sm">{success}</p>
                         </div>
                     )}
@@ -291,20 +255,21 @@ function ClientSignUp({ navigateTo }) {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className={`w-full py-2 px-4 text-sm font-medium rounded-md text-white ${
+                            className={`w-full py-2 px-4 text-sm font-medium rounded-md text-white flex items-center justify-center gap-2 transition ${
                                 isLoading
-                                    ? 'bg-blue-400 cursor-not-allowed'
+                                    ? 'bg-blue-500 cursor-not-allowed opacity-75'
                                     : 'bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
                             }`}
                         >
+                            {isLoading && <Loader size={16} className="animate-spin" />}
                             {isLoading ? 'Registrando...' : 'Registrarse'}
                         </button>
                     </div>
 
-                    <div className="flex justify-between items-center mt-4">
+                    <div className="flex flex-col gap-3 mt-4">
                         <button
                             onClick={handleGoLogin}
-                            className="text-blue-400 hover:text-blue-300 text-sm"
+                            className="text-blue-400 hover:text-blue-300 text-sm transition"
                             type="button"
                         >
                             ¿Ya tienes cuenta? Iniciar sesión
@@ -312,7 +277,7 @@ function ClientSignUp({ navigateTo }) {
 
                         <button
                             onClick={handleGoHome}
-                            className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 transition text-sm"
+                            className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded transition text-sm"
                             type="button"
                         >
                             Volver a inicio
